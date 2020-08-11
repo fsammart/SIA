@@ -1,7 +1,7 @@
-package ar.edu.itba.sia.solver;
+package ar.edu.itba.sia.tp1;
 
-import ar.edu.itba.sia.solver.api.Rule;
-import ar.edu.itba.sia.solver.api.State;
+import ar.edu.itba.sia.tp1.api.Rule;
+import ar.edu.itba.sia.tp1.api.State;
 
 public class Node {
     private final State state;

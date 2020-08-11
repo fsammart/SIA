@@ -1,10 +1,9 @@
-package ar.edu.itba.sia.solver;
+package ar.edu.itba.sia.tp1;
 
-import ar.edu.itba.sia.solver.api.Problem;
-import ar.edu.itba.sia.solver.api.Rule;
-import ar.edu.itba.sia.solver.api.State;
+import ar.edu.itba.sia.tp1.api.Problem;
+import ar.edu.itba.sia.tp1.api.Rule;
+import ar.edu.itba.sia.tp1.api.State;
 
-import java.awt.*;
 import java.util.*;
 
 public class Engine {
@@ -20,12 +19,15 @@ public class Engine {
     private Map<State,Integer> visited; /* store visited with their cost (depth) */
     private boolean finished;
     private Node goalNode;
+    private int explodedCount ;
 
     public Engine(Problem p) {
-        this.problem = problem;
+        this.problem = p;
         this.nodes = new LinkedList<Node>();
         this.finished = false;
         this.goalNode = null;
+        this.visited = new HashMap<>();
+        this.explodedCount = 0;
     }
 
     /**
@@ -38,6 +40,7 @@ public class Engine {
         Node currentNode = null;
         while(!nodes.isEmpty() && !finished){
             currentNode = nodes.pop();
+
             State currentState = currentNode.getState();
             int currentDepth = currentNode.getDepth();
             int currentCost = currentNode.getCost();
@@ -56,13 +59,21 @@ public class Engine {
                 break;
             }
 
-            Map<State, Map.Entry<Rule, Integer>> des = problem.getDescendants(currentNode.getState());
+            // check lock condition
+
+            if(problem.isLock(currentState)){
+                continue;
+            }
+            explodedCount ++;
+            Map<Rule, State> des = problem.getDescendants(currentNode.getState());
 
             // For effectively final
             Node aux = currentNode;
-            des.forEach((State s, Map.Entry<Rule,Integer> m) ->{
-                if(!visited.containsKey(s)){
-                    nodes.push(new Node(s, currentDepth + 1, aux, m.getValue(),m.getKey()));
+            int acumCost = currentNode.getCost();
+            des.forEach((Rule r, State s) ->{
+                if(!(visited.containsKey(s) && visited.get(s) <= acumCost + r.getCost())){
+                    nodes.push(new Node(s, currentDepth + 1,
+                            aux, acumCost+ r.getCost(),r));
                 }
             });
 
