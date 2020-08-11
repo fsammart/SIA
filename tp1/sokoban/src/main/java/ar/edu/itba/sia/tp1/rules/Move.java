@@ -1,19 +1,45 @@
-package ar.edu.itba.sia.sokoban.rules;
+package ar.edu.itba.sia.tp1.rules;
 
-import ar.edu.itba.sia.sokoban.SokobanState;
-import ar.edu.itba.sia.solver.api.Rule;
-import ar.edu.itba.sia.solver.api.State;
-import javafx.util.Pair;
+import ar.edu.itba.sia.tp1.SokobanState;
+import ar.edu.itba.sia.tp1.api.Rule;
+import ar.edu.itba.sia.tp1.api.State;
 
 import java.awt.Point;
-import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 
 public class Move implements Rule {
     private int dx;
     private int dy;
+    private String name;
+    private int cost;
+
+
+
+    public Move(int dx, int dy, String name, int cost){
+        this.dx = dx;
+        this.dy = dy;
+        this.name = name;
+        this.cost = cost;
+    }
+
+    public boolean canPush(SokobanState s, Point box){
+        // 4 corners: UP RIGHT / UP LEFT / DOWN RIGHT / DOWN LEFT
+        Point playerPosition = new Point(box.x -dx, box.y -dy);
+        // check if player position is empty
+        if(s.getElement(playerPosition) != SokobanState.EMPTY){
+            // player position is considered empty
+            return false;
+        }
+        Point targetPosition = box;
+        Point targetNextPosition = new Point();
+        targetNextPosition.setLocation(targetPosition.x + dx, targetPosition.y + dy);
+
+        char targetNextObject = s.getElement(targetNextPosition);
+
+        return targetNextObject == SokobanState.EMPTY;
+
+    }
 
 
     @Override
@@ -23,7 +49,7 @@ public class Move implements Rule {
         Point targetPosition = new Point();
         Point targetNextPosition = new Point();
         targetPosition.setLocation(playerPosition.x + dx, playerPosition.y + dy);
-        targetNextPosition.setLocation(playerPosition.x + dx, playerPosition.y + dy);
+        targetNextPosition.setLocation(targetPosition.x + dx, targetPosition.y + dy);
         char targetObject = sokobanState.getElement(targetPosition);
         char targetNextObject = sokobanState.getElement(targetNextPosition);
 
@@ -55,6 +81,11 @@ public class Move implements Rule {
         throw new IllegalStateException("Wrong board");
     }
 
+    @Override
+    public int getCost() {
+        return cost;
+    }
+
     private SokobanState push(SokobanState s, Point playerPosition, Point boxPosition, Point nextPosition){
         SokobanState newState = (SokobanState) s.clone();
         Set<Point> boxes = newState.getBoxes();
@@ -74,6 +105,6 @@ public class Move implements Rule {
 
     @Override
     public String getName() {
-        return "generic move";
+        return name;
     }
 }

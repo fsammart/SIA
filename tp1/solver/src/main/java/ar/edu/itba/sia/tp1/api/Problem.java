@@ -1,6 +1,5 @@
-package ar.edu.itba.sia.solver.api;
+package ar.edu.itba.sia.tp1.api;
 
-import java.util.List;
 import java.util.Map;
 
 public interface Problem {
@@ -26,5 +25,13 @@ public interface Problem {
      * @param s
      * @return List with all possible descendant states.
      */
-    Map<State, Map.Entry<Rule, Integer>> getDescendants(State s);
+    Map<Rule, State> getDescendants(State s);
+
+
+    /**
+     * Checks is state is in lock condition
+     * @param s
+     * @return
+     */
+    boolean isLock(State s);
 }

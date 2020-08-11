@@ -1,4 +1,4 @@
-package ar.edu.itba.sia.solver.api;
+package ar.edu.itba.sia.tp1.api;
 
 public interface State {
     /**
@@ -12,11 +12,6 @@ public interface State {
      */
     boolean equals(Object state);
 
-    /**
-     *
-     * @return problem relevant hashcode of state.
-     */
-    int hashcode();
 
 
     /**

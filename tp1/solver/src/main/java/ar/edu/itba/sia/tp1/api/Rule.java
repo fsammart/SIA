@@ -1,6 +1,4 @@
-package ar.edu.itba.sia.solver.api;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
+package ar.edu.itba.sia.tp1.api;
 
 import java.util.Optional;
 
@@ -11,6 +9,8 @@ public interface Rule {
      * @return new state after applying rule.
      */
     Optional<State> apply(State state);
+
+    int getCost();
 
     String getName();
 
