@@ -45,6 +45,8 @@ public class Engine {
             int currentDepth = currentNode.getDepth();
             int currentCost = currentNode.getCost();
 
+            System.out.println(currentState);
+
             if(visited.containsKey(currentState)
                     && visited.get(currentState) <= currentCost){
                 //already visited with lower cost
@@ -61,19 +63,20 @@ public class Engine {
 
             // check lock condition
 
-            if(problem.isLock(currentState)){
+            if(problem.isLock(currentState, currentNode.getBirthRule())){
+                visited.put(currentState,0);
                 continue;
             }
             explodedCount ++;
-            Map<Rule, State> des = problem.getDescendants(currentNode.getState());
+            List<Map.Entry<Rule, State>> des = problem.getDescendants(currentNode.getState());
 
             // For effectively final
             Node aux = currentNode;
             int acumCost = currentNode.getCost();
-            des.forEach((Rule r, State s) ->{
-                if(!(visited.containsKey(s) && visited.get(s) <= acumCost + r.getCost())){
-                    nodes.push(new Node(s, currentDepth + 1,
-                            aux, acumCost+ r.getCost(),r));
+            des.forEach(e ->{
+                if(!(visited.containsKey(e.getValue()) && visited.get(e.getValue()) <= acumCost + e.getKey().getCost())){
+                    nodes.push(new Node(e.getValue(), currentDepth + 1,
+                            aux, acumCost+ e.getKey().getCost(),e.getKey()));
                 }
             });
 
