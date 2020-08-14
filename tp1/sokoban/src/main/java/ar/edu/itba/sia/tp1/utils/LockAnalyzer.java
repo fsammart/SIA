@@ -3,23 +3,24 @@ package ar.edu.itba.sia.tp1.utils;
 import ar.edu.itba.sia.tp1.SokobanState;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
 public class LockAnalyzer {
     private static Set<Point> lockPositions;
-    private static Set<Point> lockRowSpace;
-    private static Set<Point> lockColumnSpace;
+    private static List<Point> lockRowSpace ;
+    private static List<Point> lockColumnSpace;
+
+    public static final void lockInitialize(SokobanState s){
+        lockPositions = new HashSet<>();
+        lockRowSpace = new ArrayList<>(s.getMap().length);
+        lockColumnSpace = new ArrayList<>(s.getMap()[0].length);
+        searchLockPositions(s);
+    }
 
     public static final boolean isLock(SokobanState s){
-        if(lockPositions == null){
-            // only here in initial state
-            lockPositions = new HashSet<>();
-            lockRowSpace = new HashSet<>();
-            lockColumnSpace = new HashSet<>();
-            searchLockPositions(s);
-        }
 
         Set<Point> boxes = s.getBoxes();
 

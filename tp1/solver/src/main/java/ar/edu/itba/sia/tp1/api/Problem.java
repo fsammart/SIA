@@ -1,5 +1,7 @@
 package ar.edu.itba.sia.tp1.api;
 
+import ar.edu.itba.sia.tp1.Node;
+
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +22,13 @@ public interface Problem {
     boolean isGoal(State s);
 
     /**
-     * returns all possible states from a given state, applying all available rules
+     * returns all possible states from a given node state, applying all available rules
      * for the state.
      * Check if each rule has a cost assigned, that way we can only return Rule.
      * @param s
      * @return List with all possible descendant states.
      */
-    List<Map.Entry<Rule, State>> getDescendants(State s);
+    List<Node> getDescendants(Node n);
 
 
     /**

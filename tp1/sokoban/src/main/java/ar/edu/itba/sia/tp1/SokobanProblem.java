@@ -36,6 +36,8 @@ public class SokobanProblem implements Problem{
         rules.add(new Push(1,0, "push down",1));
         rules.add(new Push(-1,0, "push up",1));
 
+        LockAnalyzer.lockInitialize((SokobanState) initialState);
+
     }
 
     public State getInitialState() {
@@ -57,17 +59,20 @@ public class SokobanProblem implements Problem{
     @Override
     public boolean isLock(State s, Rule r) {
         if(r != null && r.getClass().equals(Move.class)){
+            // If previous movement is not push then dont analyze.
             return false;
         }
         return LockAnalyzer.isLock((SokobanState) s);
     }
 
     @Override
-    public List<Map.Entry<Rule, State>> getDescendants(State s) {
-        List<Map.Entry<Rule, State>> movements = new LinkedList<>();
+    public List<Node> getDescendants(Node n) {
+        List<Node> movements = new LinkedList<>();
 
         for(Rule r : rules){
-            r.apply(s).ifPresent(newState -> movements.add(Map.entry(r,newState)));
+            r.apply(n.getState()).ifPresent(
+                    newState -> movements.add(
+                            new Node(newState,n.getDepth() + 1,n, n.getCost() + r.getCost(),r)));
         }
         return movements;
     }

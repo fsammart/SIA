@@ -1,8 +1,6 @@
 package ar.edu.itba.sia.tp1;
 
-import ar.edu.itba.sia.tp1.api.Problem;
-import ar.edu.itba.sia.tp1.api.Rule;
-import ar.edu.itba.sia.tp1.api.State;
+import ar.edu.itba.sia.tp1.api.*;
 
 import java.util.*;
 
@@ -14,20 +12,30 @@ public class Engine {
      * In dfs usign offerFirst (stack) and bfs just offer (queue)
       */
 
-    private Deque<Node> nodes;
+    private PriorityQueue<Node> nodes;
     private Problem problem;
     private Map<State,Integer> visited; /* store visited with their cost (depth) */
     private boolean finished;
     private Node goalNode;
     private int explodedCount ;
+    private Strategy strategy;
+    private Optional<Heuristic> heuristic;
 
-    public Engine(Problem p) {
+    public Engine(Problem p, Strategy strategy, Optional<Heuristic> heuristic) {
         this.problem = p;
-        this.nodes = new LinkedList<Node>();
+        this.nodes = new PriorityQueue<Node>(strategy);
         this.finished = false;
         this.goalNode = null;
-        this.visited = new HashMap<>();
         this.explodedCount = 0;
+        this.strategy = strategy;
+        if(strategy.needsHeuristic()){
+            if(!heuristic.isPresent()){
+                throw new IllegalArgumentException("Chosen Strrategy needs Heuristic");
+            }
+            Node.setHeuristic(heuristic);
+        }else{
+            Node.setHeuristic(Optional.empty());
+        }
     }
 
     /**
@@ -36,24 +44,21 @@ public class Engine {
     public Optional<Deque<Rule>> solve(){
         State initialState = problem.getInitialState();
         Node initialNode = new Node(initialState, 0, null, 0, null);
-        nodes.push(initialNode);
+        nodes.add(initialNode);
         Node currentNode = null;
         while(!nodes.isEmpty() && !finished){
-            currentNode = nodes.pop();
+            currentNode = nodes.poll();
 
             State currentState = currentNode.getState();
             int currentDepth = currentNode.getDepth();
-            int currentCost = currentNode.getCost();
 
-            System.out.println(currentState);
+            //System.out.println(currentState);
 
-            if(visited.containsKey(currentState)
-                    && visited.get(currentState) <= currentCost){
-                //already visited with lower cost
+            if(!strategy.needsExploring(currentNode)){
                 continue;
             }
 
-            visited.put(currentState, currentCost);
+            strategy.visit(currentNode);
 
             if(problem.isGoal(currentState)){
                 finished = true;
@@ -64,19 +69,18 @@ public class Engine {
             // check lock condition
 
             if(problem.isLock(currentState, currentNode.getBirthRule())){
-                visited.put(currentState,0);
+                // visited.put(currentState,0);
                 continue;
             }
             explodedCount ++;
-            List<Map.Entry<Rule, State>> des = problem.getDescendants(currentNode.getState());
+            List<Node> des = problem.getDescendants(currentNode);
 
             // For effectively final
             Node aux = currentNode;
             int acumCost = currentNode.getCost();
-            des.forEach(e ->{
-                if(!(visited.containsKey(e.getValue()) && visited.get(e.getValue()) <= acumCost + e.getKey().getCost())){
-                    nodes.push(new Node(e.getValue(), currentDepth + 1,
-                            aux, acumCost+ e.getKey().getCost(),e.getKey()));
+            des.forEach(n ->{
+                if(strategy.needsExploring(n)){
+                    nodes.add(n);
                 }
             });
 
