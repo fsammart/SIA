@@ -19,6 +19,7 @@ public class SokobanState implements State, Cloneable {
 
     /* static for one reference */
     public static char[][] map = null;// map with walls and goals that are static.
+    public static char[][] areaMap = null;// map with areas defined that are static.
     public static  Set<Point> goals = null;
 
     private Point playerPosition;
@@ -36,7 +37,6 @@ public class SokobanState implements State, Cloneable {
         this.playerPosition = playerPosition;
         this.boxes = boxes;
         this.goals = goals;
-
     }
 
     /**
@@ -66,7 +66,6 @@ public class SokobanState implements State, Cloneable {
             }
         }
 
-
         /**
          * check for Invalid configurations
          */
@@ -76,9 +75,68 @@ public class SokobanState implements State, Cloneable {
 
         }
 
+        computeAreaMap();
+
         return Optional.of(new SokobanState(map, playerPosition, boxes, goals));
     }
 
+    /**
+     * calculate the static defined areas of the board
+     * considering each area is connected by only one tunnel
+     */
+    private static void computeAreaMap() {
+        // Java initializes char arrays in 0/
+        areaMap = new char[areaMap.length][areaMap[0].length];
+        Set<Integer> visitedAreas = new HashSet<>();
+        char currentArea = 0;
+        for (int row = 0; row < areaMap.length; row++) {
+            for (int col = 0; col < areaMap[0].length; col++) {
+                int areaId = visitedAreas.size();
+                if (areaMap[row][col] != 'w' && !visitedAreas.contains(areaId)) {
+                    visitArea(row, col, visitedAreas, areaId, false);
+                }
+            }
+        }
+    }
+
+    private static boolean visitArea(int row, int col, Set<Integer> visitedAreas, int areaId, boolean tunnelVisited) {
+        if (areaMap[row][col] == 'w') {
+            return false;
+        }
+        if (row + 1 < areaMap.length && row - 1 >= 0
+                && areaMap[row - 1][col] == 'w' && areaMap[row + 1][col] == 'w'
+                && !tunnelVisited) {
+            return true;
+        }
+        if (col + 1 < areaMap[0].length && col - 1 >= 0
+                && areaMap[row][col - 1] == 'w' && areaMap[row][col + 1] == 'w'
+                && !tunnelVisited) {
+            return true;
+        }
+
+        areaMap[row][col] = (char)areaId;
+        if (!visitedAreas.contains(areaId)) {
+            visitedAreas.add(areaId);
+        }
+        int[][] dir ={{0,1},{-1,0},{0, -1},{0, 1}};
+        for (int i = 0; i < 4; i++) {
+            int targetRow = row + dir[i][0];
+            int targetCol = col + dir[i][1];
+            if (targetRow < areaMap.length && targetRow >= 0 &&
+                    targetCol < areaMap[0].length && targetCol >= 0)  {
+                tunnelVisited = visitArea(targetRow, targetCol, visitedAreas, areaId, tunnelVisited);
+            }
+        }
+        return tunnelVisited;
+    }
+
+    public int getPlayerArea() {
+        return areaMap[playerPosition.y][playerPosition.x];
+    }
+
+    public int getPositionArea(Point p) {
+        return areaMap[p.y][p.x];
+    }
 
     /**
      *
