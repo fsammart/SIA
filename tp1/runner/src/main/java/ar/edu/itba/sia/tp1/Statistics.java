@@ -21,7 +21,7 @@ public class Statistics {
     public static void main(String args[]) throws FileNotFoundException {
 
         char[][] map = null;
-        String mapPath = "easy.map";
+        String mapPath = "maps/easy.map";
 
         minDepth = 5;
         step = 2;
