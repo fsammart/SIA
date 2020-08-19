@@ -27,10 +27,9 @@ public class MinMatchingHeuristic implements Heuristic {
         List<Point> boxList = new ArrayList<Point>();
         boxList.addAll(ss.getBoxes());
 
-        int ret = 0;
-
         // n + 1 length for storing marks
         int[][][] adjMatrix = new int[n + 1][n + 1][2];
+        // n + 1 length for storing marks
         int[][] originalAdjMatrix = new int[n][n];
         // Step 1
         for (int i = 0; i < n; i++) {
@@ -66,7 +65,7 @@ public class MinMatchingHeuristic implements Heuristic {
         boolean[] coveredCols = new boolean[n];
         boolean[] assignedRows = new boolean[n];
         boolean[] assignedCols = new boolean[n];
-        while (lineCount < ss.getGoals().size()) {
+        while (lineCount < n) {
             lineCount = 0;
             Arrays.fill(coveredCols, false);
             Arrays.fill(coveredRows, false);
@@ -81,14 +80,11 @@ public class MinMatchingHeuristic implements Heuristic {
                         assignedCols[j] = true;
                         assignedRows[i] = true;
                     }
-                    if (adjMatrix[i][j][0] == 0 && (assignedCols[j] || assignedRows[i])) {
+                    else if (adjMatrix[i][j][0] == 0 && (assignedCols[j] || assignedRows[i])) {
                         // Star 0
                         adjMatrix[i][j][1] = 'x';
                     }
-//                    if (adjMatrix[i][j][0] == 0)
-//                        System.out.println(adjMatrix[i][j][1]);
                 }
-
             }
 
             Set<Integer> newlyMarkedRows = new HashSet<>();
@@ -104,20 +100,19 @@ public class MinMatchingHeuristic implements Heuristic {
                 }
                 if (!assigned) {
                     adjMatrix[i][n][0] = 'm';
-                    lineCount++;
                     newlyMarkedRows.add(i);
                 }
             }
+
             // Until there are no new rows or columns being marked
-            while (!newlyMarkedColumns.isEmpty() && !newlyMarkedRows.isEmpty()) {
+            while (!newlyMarkedColumns.isEmpty() || !newlyMarkedRows.isEmpty()) {
                 // Mark all columns having stars in newly marked row(s)
                 for (int j = 0; j < n; j++) {
                     for (int i = 0; i < n; i++) {
                         if (adjMatrix[i][j][1] == 'x' && newlyMarkedRows.contains(i)) {
                             adjMatrix[n][j][0] = 'm';
-
-                            lineCount++;
                             newlyMarkedColumns.add(j);
+                            coveredCols[j] = true;
                             break;
                         }
                     }
@@ -128,7 +123,6 @@ public class MinMatchingHeuristic implements Heuristic {
                     for (int j = 0; j < n; j++) {
                         if (adjMatrix[i][j][1] == 'a' && newlyMarkedColumns.contains(j)) {
                             adjMatrix[i][n][0] = 'm';
-                            lineCount++;
                             newlyMarkedRows.add(i);
                             break;
                         }
@@ -138,38 +132,37 @@ public class MinMatchingHeuristic implements Heuristic {
             }
             // draw lines through all marked columns and unmarked rows
             for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (adjMatrix[i][n][0] != 'm') {
-                        coveredRows[i] = true;
-                    }
-                    if (adjMatrix[n][j][0] == 'm') {
-                        coveredCols[j] = true;
-                    }
+                if (adjMatrix[i][n][0] != 'm') {
+                    coveredRows[i] = true;
+                    lineCount++;
+                }
+            }
+            for (int j = 0; j < n; j++) {
+                if (adjMatrix[n][j][0] == 'm') {
+                    coveredCols[j] = true;
+                    lineCount++;
                 }
             }
             // Step 5
-            if (lineCount < ss.getGoals().size()) {
-
+            if (lineCount < n) {
                 // Find the smallest entry not covered by any line
                 int minValue = Integer.MAX_VALUE;
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
                         if (!coveredRows[i] && !coveredCols[j] && adjMatrix[i][j][0] <= minValue) {
                             minValue = adjMatrix[i][j][0];
-//                            if (minValue > 0)
-                                System.out.println(minValue);
+
                         }
                     }
                 }
-
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
                         // Subtract this entry from each row that isn’t crossed out (or each row that has been marked)
                         if (adjMatrix[i][n][0] == 'm') {
                             adjMatrix[i][j][0] -= minValue;
                         }
-                        // Then add it to each column that is crossed out (or each column that has not been marked)
-                        if (adjMatrix[n][j][0] != 'm') {
+                        // Then add it to each column that is crossed out (or each column that has been marked)
+                        if (adjMatrix[n][j][0] == 'm') {
                             adjMatrix[i][j][0] += minValue;
                         }
                         // reset to going back to step 3
@@ -183,18 +176,18 @@ public class MinMatchingHeuristic implements Heuristic {
         // The minimum cost is the sum of all the cost where are 0 that each row an column ont intersect
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-//                if ( !(adjMatrix[n][j][0] == 'm' && adjMatrix[i][n][0] != 'm')
-//                        && adjMatrix[n][j][0] == 'm' && adjMatrix[i][n][0] == 'm' && adjMatrix[i][j][1] == 'x'
-//                        || adjMatrix[n][j][0] != 'm' && adjMatrix[i][n][0] != 'm' && adjMatrix[i][j][1] == 'a') {
-//                    minimumCost += originalAdjMatrix[i][j];
-//                }
-                if (  (coveredCols[j] && adjMatrix[i][j][1] == 'x')
-                        || (coveredRows[i] && adjMatrix[i][j][1] == 'a')) {
+                if ( !(adjMatrix[n][j][0] == 'm' && adjMatrix[i][n][0] != 'm')
+                        && adjMatrix[n][j][0] == 'm' && adjMatrix[i][n][0] == 'm' && adjMatrix[i][j][1] == 'x'
+                        || adjMatrix[n][j][0] != 'm' && adjMatrix[i][n][0] != 'm' && adjMatrix[i][j][1] == 'a') {
                     minimumCost += originalAdjMatrix[i][j];
                 }
+//                if (  (coveredCols[j] && adjMatrix[i][j][1] == 'x')
+//                        || (coveredRows[i] && adjMatrix[i][j][1] == 'a')) {
+//                    minimumCost += originalAdjMatrix[i][j];
+//                }
             }
         }
-        System.out.println(minimumCost);
+//        System.out.println(minimumCost);
         return minimumCost;
     }
 
@@ -238,14 +231,12 @@ public class MinMatchingHeuristic implements Heuristic {
                 pushes += 2;
                 break;
             }
-            boxCol += colStep;
         }
         while (boxCol == goal.x && boxRow != goal.y) {
             if (ss.getBoxes().contains(new Point(boxCol, boxRow))) {
                 pushes += 2;
                 break;
             }
-            boxRow += rowStep;
         }
 
         return pushes;
