@@ -14,6 +14,7 @@ public class Node {
     private final Rule birthRule;
     private  double heuristicValue;
     private static Optional<Heuristic> heuristic;
+    private static Class modifierRuleClass;
 
 
     public Node(State state, int depth, Node parent, int cost, Rule birthRule) {
@@ -22,7 +23,14 @@ public class Node {
         this.parent = parent;
         this.cost = cost;
         this.birthRule = birthRule;
-        heuristic.ifPresent(h -> this.heuristicValue = h.getValue(state));
+        this.heuristicValue = 0;
+        heuristic.ifPresent(h -> {
+            if(birthRule == null || birthRule.getClass().equals(modifierRuleClass)){
+                this.heuristicValue = h.getValue(state);
+            } else{
+                this.heuristicValue = parent.heuristicValue;
+            }
+        } );
     }
 
     @Override
@@ -39,6 +47,7 @@ public class Node {
 
     public static void setHeuristic(Optional<Heuristic> h){
         heuristic = h;
+        h.ifPresent(p -> modifierRuleClass = p.getModifierRulesClass());
     }
 
     public State getState() {

@@ -3,6 +3,7 @@ package ar.edu.itba.sia.tp1.heuristics;
 import ar.edu.itba.sia.tp1.SokobanState;
 import ar.edu.itba.sia.tp1.api.Heuristic;
 import ar.edu.itba.sia.tp1.api.State;
+import ar.edu.itba.sia.tp1.rules.Push;
 import ar.edu.itba.sia.tp1.utils.LockAnalyzer;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -17,14 +18,14 @@ public class MinMatchingHeuristic implements Heuristic {
         if(LockAnalyzer.isLock(ss)){
             return Double.MAX_VALUE;
         }
-        ss = (SokobanState) ss.clone();
+
         int n = ss.getGoals().size();
 
         List<Point> goalsList = new ArrayList<Point>();
         goalsList.addAll(ss.getGoals());
 
         List<Point> boxList = new ArrayList<Point>();
-        goalsList.addAll(ss.getBoxes());
+        boxList.addAll(ss.getBoxes());
 
         // Minimum columns an rows values are stored in extra row/column
         int[][] adjMatrix = new int[n][n];
@@ -71,6 +72,8 @@ public class MinMatchingHeuristic implements Heuristic {
 
         pushes = Math.abs(dx) + Math.abs(dy);
 
+        /*
+
         int aux = boxCol;
         //Check for backouts
         while (!playerCanPushBox(boxCol, boxRow, colStep, 0, ss)) {
@@ -108,10 +111,13 @@ public class MinMatchingHeuristic implements Heuristic {
             }
             boxRow += rowStep;
         }
+        */
 
         return pushes;
-    }
 
+
+    }
+    /*
     private boolean playerCanPushBox(int col, int row, int colStep, int rowStep, SokobanState ss) {
         if (ss.getMap()[col + colStep][row + rowStep] == 'w'
                 || ss.getMap()[col - colStep][row - rowStep] == 'w') {
@@ -121,5 +127,11 @@ public class MinMatchingHeuristic implements Heuristic {
             return false;
         }
         return true;
+    }
+    */
+
+    @Override
+    public Class getModifierRulesClass() {
+        return Push.class;
     }
 }

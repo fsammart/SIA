@@ -1,0 +1,9 @@
+#Engine Properties
+map=maps/easy.map #path to map
+strategy=astar
+heuristic=manhattanobstacles #[emptygoals,minimumDistance,manhattanobstacles]
+#min_depth= 5 #For IDDFS
+#step= 5      #For IDDFS
+#max_depth= 100 #For IDDFS
+# In case of BFS,DFS and IDDFS
+detect_lock_states=true

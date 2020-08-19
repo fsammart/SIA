@@ -3,28 +3,38 @@ package ar.edu.itba.sia.tp1.strategies;
 import ar.edu.itba.sia.tp1.Node;
 import ar.edu.itba.sia.tp1.api.Strategy;
 
-public class GlobalGreedy implements Strategy {
-    Strategy DFS = new DFS();
+import java.util.LinkedList;
+import java.util.List;
+
+public class GlobalGreedy extends RandomStrategy implements Strategy {
+    Strategy BFS = new BFS();
     @Override
     public boolean needsExploring(Node n) {
-        return DFS.needsExploring(n);
+        return BFS.needsExploring(n);
     }
 
     @Override
     public void visit(Node n) {
-        DFS.visit(n);
+        BFS.visit(n);
     }
 
     @Override
     public int compare(Node o1, Node o2) {
-        int c = Integer.compare(o1.getDepth(), o2.getDepth());
-        if(c != 0)
-            return c;
-        return Double.compare(o1.getHeuristicValue() ,o2.getHeuristicValue());
+        int compare =  Double.compare(o1.getHeuristicValue() ,o2.getHeuristicValue());
+        return compare==0 ? getRandomPriority() : compare;
     }
 
     @Override
     public boolean needsHeuristic() {
         return true;
+    }
+
+    @Override
+    public List<Node> nextIteration() {
+        return new LinkedList<>();
+    }
+    @Override
+    public String toString() {
+        return "GolobalGreedy";
     }
 }

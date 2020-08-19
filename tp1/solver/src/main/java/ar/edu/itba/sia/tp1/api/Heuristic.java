@@ -1,5 +1,7 @@
 package ar.edu.itba.sia.tp1.api;
 
+import java.util.List;
+
 public interface Heuristic {
 
     /**
@@ -8,4 +10,6 @@ public interface Heuristic {
      * @return
      */
     public double getValue(State s);
+
+    Class getModifierRulesClass();
 }

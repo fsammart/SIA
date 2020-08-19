@@ -4,12 +4,9 @@ import ar.edu.itba.sia.tp1.Node;
 import ar.edu.itba.sia.tp1.api.State;
 import ar.edu.itba.sia.tp1.api.Strategy;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class BFS implements Strategy {
+public class BFS extends RandomStrategy implements Strategy {
 
     Set<State> visited = new HashSet<>();
 
@@ -18,7 +15,7 @@ public class BFS implements Strategy {
         State currentState = n.getState();
 
         if(visited.contains(currentState)){
-            //already visited with lower cost
+            //already visited
             return false;
         }
         return true;
@@ -31,11 +28,22 @@ public class BFS implements Strategy {
 
     @Override
     public int compare(Node o1, Node o2) {
-        return Integer.compare(o1.getDepth(),o2.getDepth());
+        int compare =Integer.compare(o1.getDepth(),o2.getDepth());
+
+        return  compare==0 ? getRandomPriority() : compare;
     }
 
     @Override
     public boolean needsHeuristic() {
         return false;
+    }
+
+    @Override
+    public List<Node> nextIteration() {
+        return new LinkedList<>();
+    }
+    @Override
+    public String toString() {
+        return "BFS";
     }
 }

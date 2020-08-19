@@ -1,6 +1,7 @@
 package ar.edu.itba.sia.tp1;
 
 import ar.edu.itba.sia.tp1.api.State;
+import ar.edu.itba.sia.tp1.heuristics.ManhattanDistanceObstacles;
 
 import java.awt.Point;
 import java.util.*;
@@ -19,7 +20,7 @@ public class SokobanState implements State, Cloneable {
 
     /* static for one reference */
     public static char[][] map = null;// map with walls and goals that are static.
-    public static char[][] areaMap = null;// map with areas defined that are static.
+    //public static char[][] areaMap = null;// map with areas defined that are static.
     public static  Set<Point> goals = null;
 
     private Point playerPosition;
@@ -66,6 +67,19 @@ public class SokobanState implements State, Cloneable {
             }
         }
 
+        int [][] distMap = ManhattanDistanceObstacles.calculateDistances(map,goals);
+
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[0].length; col++) {
+                if(distMap[row][col] == -1){
+                    if (map[row][col] != ' ') {
+                        throw new IllegalArgumentException("Wrong Map configuration");
+                    }
+
+                    map[row][col] = '#';
+                }
+            }
+        }
         /**
          * check for Invalid configurations
          */
@@ -75,15 +89,39 @@ public class SokobanState implements State, Cloneable {
 
         }
 
-        computeAreaMap();
+        //computeAreaMap();
 
         return Optional.of(new SokobanState(map, playerPosition, boxes, goals));
+    }
+
+    public boolean isTemporallyBlocked(Point box){
+        Point up = new Point(box.x - 1,box.y);
+        Point right = new Point(box.x ,box.y + 1);
+        Point down = new Point(box.x + 1,box.y);
+        Point left = new Point(box.x ,box.y -1);
+
+        boolean upBlock = this.getElement(up) != EMPTY;
+        boolean downBlock = this.getElement(down) != EMPTY;
+        boolean leftBlock = this.getElement(left) != EMPTY;
+        boolean rightBlock = this.getElement(right) != EMPTY;
+
+        // up and right
+        if(upBlock && rightBlock) return true;
+        //up and left
+        if(upBlock && leftBlock) return true;
+        //left and down
+        if(downBlock && leftBlock) return true;
+        //down and right
+        if(downBlock && rightBlock) return true;
+
+        return false;
     }
 
     /**
      * calculate the static defined areas of the board
      * considering each area is connected by only one tunnel
      */
+    /*
     private static void computeAreaMap() {
         // Java initializes char arrays in 0/
         areaMap = new char[areaMap.length][areaMap[0].length];
@@ -134,9 +172,13 @@ public class SokobanState implements State, Cloneable {
         return areaMap[playerPosition.y][playerPosition.x];
     }
 
+
+
     public int getPositionArea(Point p) {
         return areaMap[p.y][p.x];
     }
+    */
+
 
     /**
      *

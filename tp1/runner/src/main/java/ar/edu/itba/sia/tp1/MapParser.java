@@ -17,7 +17,11 @@ public class MapParser {
             char[] line = bufferedReader.readLine().toCharArray();
 
             for(int col = 0; col < mapCols; col++) {
-                map[row][col] = line[col];
+                if(line.length <= col){
+                    map[row][col] = ' ';
+                }else {
+                    map[row][col] = line[col];
+                }
             }
         }
 

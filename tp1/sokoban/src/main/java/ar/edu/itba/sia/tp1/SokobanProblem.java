@@ -26,15 +26,15 @@ public class SokobanProblem implements Problem{
         });
 
         rules = new LinkedList<>();
-        rules.add(new Move(0,1, "right",1));
-        rules.add(new Move(0,-1, "left",1));
-        rules.add(new Move(1,0, "down",1));
-        rules.add(new Move(-1,0, "up",1));
+        rules.add(new Move(0,1, "right",100));
+        rules.add(new Move(0,-1, "left",100));
+        rules.add(new Move(1,0, "down",100));
+        rules.add(new Move(-1,0, "up",100));
 
-        rules.add(new Push(0,1, "push right",1));
-        rules.add(new Push(0,-1, "push left",1));
-        rules.add(new Push(1,0, "push down",1));
-        rules.add(new Push(-1,0, "push up",1));
+        rules.add(new Push(0,1, "push right",100));
+        rules.add(new Push(0,-1, "push left",100));
+        rules.add(new Push(1,0, "push down",100));
+        rules.add(new Push(-1,0, "push up",100));
 
         LockAnalyzer.lockInitialize((SokobanState) initialState);
 

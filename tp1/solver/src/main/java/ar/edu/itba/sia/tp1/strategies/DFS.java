@@ -4,40 +4,39 @@ import ar.edu.itba.sia.tp1.Node;
 import ar.edu.itba.sia.tp1.api.State;
 import ar.edu.itba.sia.tp1.api.Strategy;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
-public class DFS implements Strategy {
+public class DFS extends RandomStrategy implements Strategy {
 
-
-    Map<State,Integer> visited = new HashMap<>();
-
+    Strategy BFS = new BFS();
 
     @Override
     public boolean needsExploring(Node n) {
-        State currentState = n.getState();
-
-        if(visited.containsKey(currentState)
-                && visited.get(currentState) <= n.getCost()){
-            //already visited with lower cost
-            return false;
-        }
-        return true;
+        return BFS.needsExploring(n);
     }
 
     @Override
     public int compare(Node o1, Node o2) {
-        return Integer.compare(o2.getDepth(), o1.getDepth());
+        int compare = Integer.compare(o2.getDepth(), o1.getDepth());
+        return  compare==0 ? getRandomPriority() : compare;
     }
 
     @Override
     public void visit(Node n) {
-        visited.put(n.getState(),n.getCost());
+        BFS.visit(n);
     }
 
     @Override
     public boolean needsHeuristic() {
         return false;
+    }
+
+    @Override
+    public List<Node> nextIteration() {
+        return new LinkedList<>();
+    }
+    @Override
+    public String toString() {
+        return "DFS";
     }
 }

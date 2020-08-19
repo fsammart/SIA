@@ -3,6 +3,7 @@ package ar.edu.itba.sia.tp1.api;
 import ar.edu.itba.sia.tp1.Node;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -13,11 +14,13 @@ public interface Strategy extends Comparator<Node> {
      * @param n
      * @return
      */
-    public boolean needsExploring(Node n);
+    boolean needsExploring(Node n);
 
-    public void visit(Node n);
+    void visit(Node n);
 
-    public boolean needsHeuristic();
+    boolean needsHeuristic();
+
+    List<Node> nextIteration();
 
 
 }
