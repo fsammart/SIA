@@ -15,7 +15,6 @@ public class Engine {
     private PriorityQueue<Node> nodes;
     private Problem problem;
     private Map<State,Integer> visited; /* store visited with their cost (depth) */
-    private boolean finished;
     private Node goalNode;
     private int explodedCount ;
     private Strategy strategy;
@@ -26,7 +25,6 @@ public class Engine {
     public Engine(Problem p, Strategy strategy, Optional<Heuristic> heuristic, boolean detect_lock) {
         this.problem = p;
         this.nodes = new PriorityQueue<Node>(strategy);
-        this.finished = false;
         this.goalNode = null;
         this.explodedCount = 0;
         this.metrics = new Metrics();
@@ -54,7 +52,7 @@ public class Engine {
         nodes.add(initialNode);
         Node currentNode = null;
         do {
-            while (!nodes.isEmpty() && !finished) {
+            while (!nodes.isEmpty() && !strategy.hasFinished()) {
                 currentNode = nodes.poll();
                 State currentState = currentNode.getState();
 
@@ -64,8 +62,8 @@ public class Engine {
                 strategy.visit(currentNode);
 
                 if (problem.isGoal(currentState)) {
-                    finished = true;
                     goalNode = currentNode;
+                    strategy.finished(goalNode);
                     break;
                 }
                 // check lock condition
@@ -85,11 +83,11 @@ public class Engine {
 
             nodes.addAll(strategy.nextIteration());
 
-        }while(!nodes.isEmpty() && !finished);
+        }while(!nodes.isEmpty() && !strategy.hasFinished() );
 
         metrics.setElapsedTime(System.currentTimeMillis() - initialTime);
 
-        if(!finished){
+        if(!strategy.hasFinished() || goalNode == null){
             return Optional.empty();
         }
         metrics.setCost(goalNode.getCost());

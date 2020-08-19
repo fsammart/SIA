@@ -32,6 +32,7 @@ public class ASTAR extends RandomStrategy implements Strategy {
         if(compare == 0){
             compare =  Double.compare(o1.getHeuristicValue(),o2.getHeuristicValue());
         }
+
         return compare==0 ? getRandomPriority() : compare;
     }
 

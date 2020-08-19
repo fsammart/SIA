@@ -1,6 +1,7 @@
 package ar.edu.itba.sia.tp1;
 
 import ar.edu.itba.sia.tp1.api.Heuristic;
+import ar.edu.itba.sia.tp1.api.Problem;
 import ar.edu.itba.sia.tp1.api.Rule;
 import ar.edu.itba.sia.tp1.api.Strategy;
 import ar.edu.itba.sia.tp1.heuristics.EmptyGoalsHeuristic;
@@ -38,7 +39,7 @@ public class Main {
 
         SokobanProblem sp = new SokobanProblem(map);
         Heuristic h = getHeuristic(c.getHeuristic());
-        Strategy strategy = getStrategy(c.getStrategy(), h);
+        Strategy strategy = getStrategy(c.getStrategy(), h, sp);
 
         Engine e = new Engine(sp, strategy, Optional.ofNullable(h), c.isDetect_lock());
 
@@ -49,14 +50,18 @@ public class Main {
 
     }
 
-    public static Strategy getStrategy(String strategy, Heuristic h){
+    public static Strategy getStrategy(String strategy, Heuristic h, Problem p){
         switch(strategy.toUpperCase()){
             case "DFS": return new DFS();
             case "BFS": return new BFS();
             case "ASTAR": return new ASTAR();
             case "GREEDY": return new GlobalGreedy();
             case "IDDFS": {
-                return new IDDFS(20,15,5);
+                return new IDDFS(c.getMax() ,c.getMin(),c.getStep());
+            }
+            case "IDGREEDY": {
+                return new IDGREEDY(c.getStep() * SokobanProblem.COST,
+                        c.getMin() * SokobanProblem.COST,c.getTimeout());
             }
             case "IDASTAR": {
                 return new IDASTAR(h);
@@ -71,6 +76,7 @@ public class Main {
             case "KM": return new MinMatchingHeuristic();
             case "MINIMUMDISTANCE": return new MinimumDistanceHeuristic();
             case "MANHATTANOBSTACLES": return new ManhattanDistanceObstacles();
+            case "MINMATCHING": return new MinMatchingHeuristic();
             default: return new EmptyGoalsHeuristic();
         }
     }
@@ -83,9 +89,14 @@ public class Main {
             System.out.println("Heuristic -> " + c.getHeuristic());
         }
         if(h != null && "IDDFS".equals(h.toString())){
-            System.out.println("Minimum Depth -> " + c.getMinDepth());
+            System.out.println("Minimum Depth -> " + c.getMin());
             System.out.println("Step -> " + c.getStep());
-            System.out.println("Maximum Depth-> " + c.getMaxDepth());
+            System.out.println("Maximum Depth-> " + c.getMax());
+        }
+        if(h != null && "IDGREEDY".equals(h.toString())){
+            System.out.println("Minimum Cost -> " + c.getMin() * SokobanProblem.COST);
+            System.out.println("Step -> " + c.getStep()* SokobanProblem.COST);
+            System.out.println("Timeout -> " + c.getTimeout());
         }
     }
 

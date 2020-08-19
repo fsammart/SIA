@@ -70,6 +70,6 @@ public class IDASTAR extends RandomStrategy implements Strategy {
 
     @Override
     public String toString() {
-        return "IDDFS";
+        return "IDASTAR";
     }
 }

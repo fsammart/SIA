@@ -22,5 +22,8 @@ public interface Strategy extends Comparator<Node> {
 
     List<Node> nextIteration();
 
+    void finished(Node goalNode);
+
+    boolean hasFinished();
 
 }

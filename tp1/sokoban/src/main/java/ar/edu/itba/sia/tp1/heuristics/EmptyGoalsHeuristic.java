@@ -1,5 +1,6 @@
 package ar.edu.itba.sia.tp1.heuristics;
 
+import ar.edu.itba.sia.tp1.SokobanProblem;
 import ar.edu.itba.sia.tp1.SokobanState;
 import ar.edu.itba.sia.tp1.api.Heuristic;
 import ar.edu.itba.sia.tp1.api.Rule;
@@ -18,7 +19,7 @@ public class EmptyGoalsHeuristic implements Heuristic {
             return Double.MAX_VALUE;
         }
 
-        return ss.getBoxes().stream().filter(b -> !ss.getGoals().contains(b)).count();
+        return ss.getBoxes().stream().filter(b -> !ss.getGoals().contains(b)).count() * SokobanProblem.COST;
     }
 
     @Override

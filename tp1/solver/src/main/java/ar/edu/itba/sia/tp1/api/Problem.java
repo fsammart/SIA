@@ -38,4 +38,7 @@ public interface Problem {
      * @return
      */
     boolean isLock(State s, Rule generationRule);
+
+
+    int getCostAmplifier();
 }

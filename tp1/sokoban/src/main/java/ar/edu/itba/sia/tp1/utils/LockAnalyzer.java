@@ -4,7 +4,6 @@ import ar.edu.itba.sia.tp1.SokobanState;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class LockAnalyzer {
     private static Set<Point> lockPositions;
@@ -27,19 +26,18 @@ public class LockAnalyzer {
                 .anyMatch(lockPositions::contains) ;
         if(r) {return true;}
 
-        boolean temporalBlock =boxes.stream()
-                .filter(p -> !SokobanState.goals.contains(p))
-                .allMatch(s::isTemporallyBlocked);
-        if(temporalBlock && !SokobanState.goals.containsAll(boxes)) {
-            return true;
-        }
-
         for(Set<Point> l : lockSpace.keySet()){
             if(boxes.stream()
                     .filter(l::contains)
                     .count() > lockSpace.get(l)){
                 return true;
             }
+        }
+
+        boolean temporalBlock =boxes.stream()
+                .allMatch(s::isTemporallyBlocked);
+        if(temporalBlock && !SokobanState.goals.containsAll(boxes)) {
+            return true;
         }
 
         return false;

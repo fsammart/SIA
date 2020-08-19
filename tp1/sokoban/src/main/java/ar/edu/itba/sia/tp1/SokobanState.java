@@ -2,6 +2,7 @@ package ar.edu.itba.sia.tp1;
 
 import ar.edu.itba.sia.tp1.api.State;
 import ar.edu.itba.sia.tp1.heuristics.ManhattanDistanceObstacles;
+import ar.edu.itba.sia.tp1.utils.MapAnalyzer;
 
 import java.awt.Point;
 import java.util.*;
@@ -67,7 +68,7 @@ public class SokobanState implements State, Cloneable {
             }
         }
 
-        int [][] distMap = ManhattanDistanceObstacles.calculateDistances(map,goals);
+        int [][] distMap = MapAnalyzer.calculateReachable(map,goals);
 
         for (int row = 0; row < map.length; row++) {
             for (int col = 0; col < map[0].length; col++) {
@@ -116,68 +117,6 @@ public class SokobanState implements State, Cloneable {
 
         return false;
     }
-
-    /**
-     * calculate the static defined areas of the board
-     * considering each area is connected by only one tunnel
-     */
-    /*
-    private static void computeAreaMap() {
-        // Java initializes char arrays in 0/
-        areaMap = new char[areaMap.length][areaMap[0].length];
-        Set<Integer> visitedAreas = new HashSet<>();
-        char currentArea = 0;
-        for (int row = 0; row < areaMap.length; row++) {
-            for (int col = 0; col < areaMap[0].length; col++) {
-                int areaId = visitedAreas.size();
-                if (areaMap[row][col] != 'w' && !visitedAreas.contains(areaId)) {
-                    visitArea(row, col, visitedAreas, areaId, false);
-                }
-            }
-        }
-    }
-
-    private static boolean visitArea(int row, int col, Set<Integer> visitedAreas, int areaId, boolean tunnelVisited) {
-        if (areaMap[row][col] == 'w') {
-            return false;
-        }
-        if (row + 1 < areaMap.length && row - 1 >= 0
-                && areaMap[row - 1][col] == 'w' && areaMap[row + 1][col] == 'w'
-                && !tunnelVisited) {
-            return true;
-        }
-        if (col + 1 < areaMap[0].length && col - 1 >= 0
-                && areaMap[row][col - 1] == 'w' && areaMap[row][col + 1] == 'w'
-                && !tunnelVisited) {
-            return true;
-        }
-
-        areaMap[row][col] = (char)areaId;
-        if (!visitedAreas.contains(areaId)) {
-            visitedAreas.add(areaId);
-        }
-        int[][] dir ={{0,1},{-1,0},{0, -1},{0, 1}};
-        for (int i = 0; i < 4; i++) {
-            int targetRow = row + dir[i][0];
-            int targetCol = col + dir[i][1];
-            if (targetRow < areaMap.length && targetRow >= 0 &&
-                    targetCol < areaMap[0].length && targetCol >= 0)  {
-                tunnelVisited = visitArea(targetRow, targetCol, visitedAreas, areaId, tunnelVisited);
-            }
-        }
-        return tunnelVisited;
-    }
-
-    public int getPlayerArea() {
-        return areaMap[playerPosition.y][playerPosition.x];
-    }
-
-
-
-    public int getPositionArea(Point p) {
-        return areaMap[p.y][p.x];
-    }
-    */
 
 
     /**

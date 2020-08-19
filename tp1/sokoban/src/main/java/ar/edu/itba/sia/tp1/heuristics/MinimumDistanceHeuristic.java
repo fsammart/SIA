@@ -1,5 +1,6 @@
 package ar.edu.itba.sia.tp1.heuristics;
 
+import ar.edu.itba.sia.tp1.SokobanProblem;
 import ar.edu.itba.sia.tp1.SokobanState;
 import ar.edu.itba.sia.tp1.api.Heuristic;
 import ar.edu.itba.sia.tp1.api.State;
@@ -41,7 +42,7 @@ public class MinimumDistanceHeuristic implements Heuristic {
             }
         }
 
-        return minDistance * l.size();
+        return minDistance * l.size() * SokobanProblem.COST;
     }
 
     @Override

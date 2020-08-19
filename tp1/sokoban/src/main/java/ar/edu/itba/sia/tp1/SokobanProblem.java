@@ -18,6 +18,7 @@ public class SokobanProblem implements Problem{
 
     private static State initialState;
     private static List<Rule> rules;
+    public static int COST = 100;
 
 
     public SokobanProblem(char[][] map){
@@ -26,15 +27,15 @@ public class SokobanProblem implements Problem{
         });
 
         rules = new LinkedList<>();
-        rules.add(new Move(0,1, "right",100));
-        rules.add(new Move(0,-1, "left",100));
-        rules.add(new Move(1,0, "down",100));
-        rules.add(new Move(-1,0, "up",100));
+        rules.add(new Move(0,1, "right",COST));
+        rules.add(new Move(0,-1, "left",COST));
+        rules.add(new Move(1,0, "down",COST));
+        rules.add(new Move(-1,0, "up",COST));
 
-        rules.add(new Push(0,1, "push right",100));
-        rules.add(new Push(0,-1, "push left",100));
-        rules.add(new Push(1,0, "push down",100));
-        rules.add(new Push(-1,0, "push up",100));
+        rules.add(new Push(0,1, "push right",COST));
+        rules.add(new Push(0,-1, "push left",COST));
+        rules.add(new Push(1,0, "push down",COST));
+        rules.add(new Push(-1,0, "push up",COST));
 
         LockAnalyzer.lockInitialize((SokobanState) initialState);
 
@@ -63,6 +64,11 @@ public class SokobanProblem implements Problem{
             return false;
         }
         return LockAnalyzer.isLock((SokobanState) s);
+    }
+
+    @Override
+    public int getCostAmplifier() {
+        return SokobanProblem.COST;
     }
 
     @Override

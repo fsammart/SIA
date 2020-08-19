@@ -1,9 +1,13 @@
 package ar.edu.itba.sia.tp1.heuristics;
 
+import ar.edu.itba.sia.tp1.SokobanProblem;
 import ar.edu.itba.sia.tp1.SokobanState;
 import ar.edu.itba.sia.tp1.api.Heuristic;
 import ar.edu.itba.sia.tp1.api.State;
+import ar.edu.itba.sia.tp1.rules.Push;
 import ar.edu.itba.sia.tp1.utils.LockAnalyzer;
+import ar.edu.itba.sia.tp1.utils.MapAnalyzer;
+
 import java.awt.Point;
 import java.util.*;
 /**
@@ -11,10 +15,18 @@ import java.util.*;
  */
 public class MinMatchingHeuristic implements Heuristic {
 
+    Map<Point,int[][]> goalsDistSegments;
+
     // Le falta los 2 ulitmos pasos el algoritmo KM
     @Override
     public double getValue(State s) {
+
         SokobanState ss = (SokobanState) s;
+
+        if(goalsDistSegments == null){
+            goalsDistSegments = MapAnalyzer.calculateDistances(ss.getMap(), ss.getGoals());
+        }
+
         if(LockAnalyzer.isLock(ss)){
             return Double.MAX_VALUE;
         }
@@ -165,8 +177,6 @@ public class MinMatchingHeuristic implements Heuristic {
                         if (adjMatrix[n][j][0] == 'm') {
                             adjMatrix[i][j][0] += minValue;
                         }
-                        // reset to going back to step 3
-//                        adjMatrix[i][j][1] = 0;
                     }
                 }
             }
@@ -181,14 +191,14 @@ public class MinMatchingHeuristic implements Heuristic {
                         || adjMatrix[n][j][0] != 'm' && adjMatrix[i][n][0] != 'm' && adjMatrix[i][j][1] == 'a') {
                     minimumCost += originalAdjMatrix[i][j];
                 }
-//                if (  (coveredCols[j] && adjMatrix[i][j][1] == 'x')
-//                        || (coveredRows[i] && adjMatrix[i][j][1] == 'a')) {
-//                    minimumCost += originalAdjMatrix[i][j];
-//                }
             }
         }
-//        System.out.println(minimumCost);
-        return minimumCost;
+        return minimumCost * SokobanProblem.COST;
+    }
+
+    @Override
+    public Class getModifierRulesClass() {
+        return Push.class;
     }
 
     private int getMinimumPush(Point box, Point goal, SokobanState ss) {
@@ -201,55 +211,9 @@ public class MinMatchingHeuristic implements Heuristic {
         int dy = goal.y - box.y;
         int rowStep = Integer.signum(dy);
 
-        pushes = Math.abs(dx) + Math.abs(dy);
-
-//        int aux = boxCol;
-//        //Check for backouts conlficts
-//        while (!playerCanPushBox(boxCol, boxRow, colStep, 0, ss)) {
-//            if (playerCanPushBox(boxCol, boxRow, - colStep, 0, ss)) {
-//                ss.setPlayerPosition(new Point(boxCol, boxRow));
-//                boxCol -= colStep;
-//            } else {
-//                boxCol = aux;
-//                break;
-//            }
-//        }
-//        aux = boxRow;
-//        while (!playerCanPushBox(boxCol, boxRow, 0, rowStep, ss)) {
-//            if (playerCanPushBox(boxCol, boxRow, 0, -rowStep, ss)) {
-//                ss.setPlayerPosition(new Point(boxCol, boxRow));
-//                boxRow -= rowStep;
-//            } else {
-//                boxRow = aux;
-//                break;
-//            }
-//        }
-
-        // Check for linear conflicts
-        while (boxRow == goal.y && boxCol != goal.x) {
-            if (ss.getBoxes().contains(new Point(boxCol, boxRow))) {
-                pushes += 2;
-                break;
-            }
-        }
-        while (boxCol == goal.x && boxRow != goal.y) {
-            if (ss.getBoxes().contains(new Point(boxCol, boxRow))) {
-                pushes += 2;
-                break;
-            }
-        }
+        pushes = goalsDistSegments.get(goal)[box.x][box.y];
 
         return pushes;
     }
-
-    private boolean playerCanPushBox(int col, int row, int colStep, int rowStep, SokobanState ss) {
-        if (ss.getMap()[col + colStep][row + rowStep] == 'w'
-                || ss.getMap()[col - colStep][row - rowStep] == 'w') {
-            return false;
-        }
-        if (ss.getPlayerArea() != ss.getPositionArea(new Point(col - colStep, row - rowStep))) {
-            return false;
-        }
-        return true;
-    }
+     
 }
