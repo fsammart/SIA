@@ -2,11 +2,9 @@ package ar.edu.itba.sia.tp1;
 
 import ar.edu.itba.sia.tp1.api.Heuristic;
 import ar.edu.itba.sia.tp1.api.Rule;
+import ar.edu.itba.sia.tp1.api.State;
 import ar.edu.itba.sia.tp1.api.Strategy;
-import ar.edu.itba.sia.tp1.heuristics.EmptyGoalsHeuristic;
-import ar.edu.itba.sia.tp1.heuristics.ManhattanDistanceObstacles;
-import ar.edu.itba.sia.tp1.heuristics.MinMatchingHeuristic;
-import ar.edu.itba.sia.tp1.heuristics.MinimumDistanceHeuristic;
+import ar.edu.itba.sia.tp1.heuristics.*;
 import ar.edu.itba.sia.tp1.strategies.*;
 
 import java.io.*;
@@ -21,7 +19,7 @@ public class Statistics {
     public static void main(String args[]) throws FileNotFoundException {
 
         char[][] map = null;
-        String mapPath = "maps/easy.map";
+        String mapPath = "maps/map5.map";
 
         minDepth = 5;
         step = 2;
@@ -40,22 +38,41 @@ public class Statistics {
 
         SokobanProblem sp = new SokobanProblem(map);
         List<String> strategies =  new LinkedList<String>(
-                Arrays.asList("BFS","DFS","IDDFS","ASTAR","IDASTAR","GREEDY"));
+                Arrays.asList("ASTAR","IDASTAR","GREEDY","IDGREEDY"));
         Strategy strategy;
         Heuristic h;
         boolean isDetectLock;
         Engine e;
-        Optional<Deque<Rule>> result;
+        Optional<Deque<Map.Entry<State,Rule>>> result;
         PrintStream ps = openFile();
+        for(int timeout = 10; timeout < 100000; timeout+=10){
+            h = new ManhattanDistanceObstacles();
+            strategy = new IDGREEDY(5,70,timeout);
+            e = new Engine(sp, strategy, Optional.ofNullable(h), true);
+            result = e.solve();
+            printStatistics(ps, mapPath, strategy, h, result, e.getMetrics(),
+                    String.valueOf(minDepth), String.valueOf(step), String.valueOf(maxDepth),true,timeout);
+        }
+        /*
         for(String s : strategies){
             for(int i = 0; i < REPEAT; i++) {
-                isDetectLock = true;
                 h = new ManhattanDistanceObstacles();
                 strategy = getStrategy(s, h);
-                e = new Engine(sp, strategy, Optional.ofNullable(h), isDetectLock);
-                result = e.solve();
-                printStatistics(ps, mapPath, strategy, h, result, e.getMetrics(),
-                        String.valueOf(minDepth), String.valueOf(step), String.valueOf(maxDepth), isDetectLock);
+                if(strategy.needsHeuristic()) {
+                    isDetectLock = true;
+                    e = new Engine(sp, strategy, Optional.ofNullable(h), isDetectLock);
+                    result = e.solve();
+                    printStatistics(ps, mapPath, strategy, h, result, e.getMetrics(),
+                            String.valueOf(minDepth), String.valueOf(step), String.valueOf(maxDepth), isDetectLock);
+
+                    h = new ManhattanDistanceObstaclesPlayer();
+                    strategy = getStrategy(s, h);
+                    e = new Engine(sp, strategy, Optional.ofNullable(h), isDetectLock);
+                    result = e.solve();
+                    printStatistics(ps, mapPath, strategy, h, result, e.getMetrics(),
+                            String.valueOf(minDepth), String.valueOf(step), String.valueOf(maxDepth), isDetectLock);
+                }
+                /*
                 if(!strategy.needsHeuristic()) {
                     strategy = getStrategy(s, h);
                     isDetectLock = false;
@@ -65,8 +82,10 @@ public class Statistics {
                     printStatistics(ps, mapPath, strategy, h, result, e.getMetrics(),
                             String.valueOf(minDepth), String.valueOf(step), String.valueOf(maxDepth), isDetectLock);
                 }
+
             }
-        }
+
+        }*/
 
     }
 
@@ -82,6 +101,9 @@ public class Statistics {
             case "IDASTAR": {
                 return new IDASTAR(h);
             }
+            case "IDGREEDY": {
+                return new IDGREEDY(5,74,100);
+            }
         }
 
         return null;
@@ -90,9 +112,12 @@ public class Statistics {
     private static Heuristic getHeuristic(String heuristic){
         switch (heuristic.toUpperCase()){
             case "EMPTYGOALS": return new EmptyGoalsHeuristic();
-            case "KM": return new MinMatchingHeuristic();
             case "MINIMUMDISTANCE": return new MinimumDistanceHeuristic();
             case "MANHATTANOBSTACLES": return new ManhattanDistanceObstacles();
+            case "MINMATCHING": return new MinMatchingHeuristic();
+            case "EMPTYGOALSP": return new EmptyGoalsHeuristicPlayer();
+            case "MINIMUMDISTANCEP": return new MinimumDistanceHeuristicPlayer();
+            case "MANHATTANOBSTACLESP": return new ManhattanDistanceObstaclesPlayer();
             default: return new EmptyGoalsHeuristic();
         }
     }
@@ -110,8 +135,8 @@ public class Statistics {
     }
 
     private static void printStatistics(PrintStream ps, String mapPath, Strategy strategy, Heuristic h,
-                                     Optional<Deque<Rule>> result, Metrics m,
-                                        String minDepth, String step, String maxDepth, boolean checkLock) throws FileNotFoundException {
+                                     Optional<Deque<Map.Entry<State,Rule>>> result, Metrics m,
+                                        String minDepth, String step, String maxDepth, boolean checkLock, int timeout) throws FileNotFoundException {
         PrintStream stdout = System.out;
         System.setOut(ps);
         printParams(strategy, h, mapPath, minDepth, step, maxDepth, checkLock);
@@ -135,7 +160,9 @@ public class Statistics {
         System.out.print(m.getExpandedNodes() + ",");
         System.out.print(m.getBoundaryNodes() + "," );
 
-        System.out.print(m.getElapsedTime());
+        System.out.print(m.getElapsedTime() + ",");
+        System.out.print(timeout);
+
         System.out.println("");
         System.setOut(stdout);
 
@@ -149,7 +176,7 @@ public class Statistics {
         PrintStream stdout = System.out;
         System.setOut(ps);
 
-        System.out.println("Map,Strategy,Heuristic,checkLock,minDepth,Step,MaxDepth,Solved,Depth,Cost,ExpandedNodes,BoundaryNodes,Time (ms)");
+        System.out.println("Map,Strategy,Heuristic,checkLock,minDepth,Step,MaxDepth,Solved,Depth,Cost,ExpandedNodes,BoundaryNodes,Time (ms), timeout");
 
         System.setOut(stdout);
         return ps;

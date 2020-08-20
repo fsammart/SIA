@@ -4,6 +4,7 @@ import ar.edu.itba.sia.tp1.SokobanState;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class LockAnalyzer {
     private static Set<Point> lockPositions;
@@ -57,6 +58,17 @@ public class LockAnalyzer {
                 }
             }
         }
+
+        List<Set<Point>> aux = new LinkedList<>();
+
+        for(Set<Point> a: lockSpace.keySet()){
+            if(lockSpace.get(a) == 0){
+                lockPositions.addAll(a);
+                aux.add(a);
+            }
+        }
+
+        aux.forEach(l -> lockSpace.remove(l));
 
     }
 

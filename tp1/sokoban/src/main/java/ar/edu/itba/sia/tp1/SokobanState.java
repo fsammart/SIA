@@ -27,6 +27,8 @@ public class SokobanState implements State, Cloneable {
     private Point playerPosition;
     final private Set<Point> boxes;
 
+    static Set<Point> unReachable = new HashSet<>();
+
 
     public SokobanState(Point playerPosition, Set<Point> boxes) {
         this.playerPosition = playerPosition;
@@ -78,6 +80,7 @@ public class SokobanState implements State, Cloneable {
                     }
 
                     map[row][col] = '#';
+                    unReachable.add(new Point(row,col));
                 }
             }
         }
@@ -143,19 +146,42 @@ public class SokobanState implements State, Cloneable {
 
         // TODO: rewrite
         StringBuilder s = new StringBuilder();
-        s.append('[');
-        s.append(playerPosition.x);
-        s.append(',');
-        s.append(playerPosition.y);
-        s.append("]  -> ");
-        boxes.stream().forEach( b-> {
-            s.append("(");
-            s.append(b.x);
-            s.append(',');
-            s.append(b.y);
-            s.append(")");
-            s.append('-');
-        });
+
+        Point player = playerPosition;
+        for(int i= 0; i < map.length; i++){
+            for(int j =0; j < map[0].length; j++){
+                Point p = new Point(i,j);
+                boolean isPlayer = p.equals(player);
+                boolean isBox = boxes.contains(p);
+                boolean isGoal = goals.contains(p);
+                boolean isUnreachable = unReachable.contains(p);
+                boolean isWall = (map[i][j] == '#');
+                if(isWall){
+                    if(isUnreachable){
+                        s.append(' ');
+                    }else{
+                        s.append('#');
+                    }
+                } else if(isBox){
+                    if(isGoal){
+                        s.append('*');
+                    }else{
+                        s.append('$');
+                    }
+                } else if(isGoal){
+                    if(isPlayer){
+                        s.append('+');
+                    }else{
+                        s.append('.');
+                    }
+                } else if(isPlayer){
+                    s.append('@');
+                }else{
+                    s.append(' ');
+                }
+            }
+            s.append('\n');
+        }
 
         return s.toString();
     }

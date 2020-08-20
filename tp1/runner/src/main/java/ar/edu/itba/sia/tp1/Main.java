@@ -1,24 +1,19 @@
 package ar.edu.itba.sia.tp1;
 
-import ar.edu.itba.sia.tp1.api.Heuristic;
-import ar.edu.itba.sia.tp1.api.Problem;
-import ar.edu.itba.sia.tp1.api.Rule;
-import ar.edu.itba.sia.tp1.api.Strategy;
-import ar.edu.itba.sia.tp1.heuristics.EmptyGoalsHeuristic;
-import ar.edu.itba.sia.tp1.heuristics.ManhattanDistanceObstacles;
-import ar.edu.itba.sia.tp1.heuristics.MinMatchingHeuristic;
-import ar.edu.itba.sia.tp1.heuristics.MinimumDistanceHeuristic;
+import ar.edu.itba.sia.tp1.api.*;
+import ar.edu.itba.sia.tp1.heuristics.*;
 import ar.edu.itba.sia.tp1.strategies.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Deque;
+import java.util.Map;
 import java.util.Optional;
 
 public class Main {
 
     private static ConfigParser c;
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws FileNotFoundException {
 
          c = new ConfigParser();
          try {
@@ -44,7 +39,7 @@ public class Main {
         Engine e = new Engine(sp, strategy, Optional.ofNullable(h), c.isDetect_lock());
 
 
-        Optional<Deque<Rule>> result = e.solve();
+        Optional<Deque<Map.Entry<State,Rule>>> result = e.solve();
 
         printResults(strategy, h, result, e.getMetrics(), e.getGoalNode());
 
@@ -73,10 +68,12 @@ public class Main {
     private static Heuristic getHeuristic(String heuristic){
         switch (heuristic.toUpperCase()){
             case "EMPTYGOALS": return new EmptyGoalsHeuristic();
-            case "KM": return new MinMatchingHeuristic();
             case "MINIMUMDISTANCE": return new MinimumDistanceHeuristic();
             case "MANHATTANOBSTACLES": return new ManhattanDistanceObstacles();
             case "MINMATCHING": return new MinMatchingHeuristic();
+            case "EMPTYGOALSP": return new EmptyGoalsHeuristicPlayer();
+            case "MINIMUMDISTANCEP": return new MinimumDistanceHeuristicPlayer();
+            case "MANHATTANOBSTACLESP": return new ManhattanDistanceObstaclesPlayer();
             default: return new EmptyGoalsHeuristic();
         }
     }
@@ -101,7 +98,10 @@ public class Main {
     }
 
     private static void printResults(Strategy s, Heuristic h,
-                                     Optional<Deque<Rule>> result, Metrics m, Node goalNode){
+                                     Optional<Deque<Map.Entry<State,Rule>>> result, Metrics m, Node goalNode) throws FileNotFoundException {
+
+        PrintStream stdout = System.out;
+        System.setOut(openFile());
         printParams(s,h);
         System.out.println("Elapsed Time (ms) -> " + m.getElapsedTime());
         if(!result.isPresent()){
@@ -110,7 +110,7 @@ public class Main {
 
             return;
         }
-        Deque<Rule> steps = result.get();
+        Deque<Map.Entry<State,Rule>> steps = result.get();
 
         System.out.println("\nSolved!!\n");
         if(!s.needsHeuristic()) System.out.println("Detect Locks (BFS,DFS,IDDFS): " + c.isDetect_lock());
@@ -121,6 +121,18 @@ public class Main {
         System.out.println("");
         System.out.println("Solution: " );
 
-        steps.forEach(r -> System.out.println(r.getName()));
+        steps.forEach(r -> System.out.println( r.getValue().getName() + '\n' + r.getKey() ));
+        System.setOut(stdout);
+    }
+
+    private static PrintStream openFile() throws FileNotFoundException {
+        final String filename = "./results/result" + System.currentTimeMillis();
+        File file = new File(filename);
+        FileOutputStream fos = new FileOutputStream(file);
+        PrintStream ps = new PrintStream(fos);
+        PrintStream stdout = System.out;
+        System.setOut(ps);
+        System.setOut(stdout);
+        return ps;
     }
 }

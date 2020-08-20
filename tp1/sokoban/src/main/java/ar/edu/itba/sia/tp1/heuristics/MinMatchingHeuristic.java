@@ -203,13 +203,6 @@ public class MinMatchingHeuristic implements Heuristic {
 
     private int getMinimumPush(Point box, Point goal, SokobanState ss) {
         int pushes = 0;
-        // Run manhattan path
-        int dx = goal.x - box.x;
-        int colStep = Integer.signum(dx);
-        int boxCol = box.x;
-        int boxRow = box.y;
-        int dy = goal.y - box.y;
-        int rowStep = Integer.signum(dy);
 
         pushes = goalsDistSegments.get(goal)[box.x][box.y];
 

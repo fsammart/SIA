@@ -24,8 +24,9 @@ public class Node {
         this.cost = cost;
         this.birthRule = birthRule;
         this.heuristicValue = 0;
+
         heuristic.ifPresent(h -> {
-            if(birthRule == null || birthRule.getClass().equals(modifierRuleClass)){
+            if(birthRule == null || (modifierRuleClass.isAssignableFrom(birthRule.getClass()))){
                 this.heuristicValue = h.getValue(state);
             } else{
                 this.heuristicValue = parent.heuristicValue;

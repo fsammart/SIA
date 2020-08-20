@@ -1,7 +1,12 @@
 package ar.edu.itba.sia.tp1.utils;
 
+import ar.edu.itba.sia.tp1.SokobanProblem;
+import ar.edu.itba.sia.tp1.SokobanState;
+
 import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MapAnalyzer {
 
@@ -116,5 +121,30 @@ public class MapAnalyzer {
             }
         }
         return goalsDistMap;
+    }
+
+    public static int getPlayerMinDistanceToBox(SokobanState ss){
+        Set<Point> goals = ss.getGoals();
+        // boxes in wrong position
+        List<Point> boxes = ss.getBoxes().stream().filter(b -> !goals.contains(b)).collect(Collectors.toList());
+        if(boxes.isEmpty()){
+            // goal state
+            return 0;
+        }
+        Point playerPosition = ss.getPlayerPosition();
+        int minDistance = -1;
+        for(Point b: boxes){
+            int aux = manhattanDistance(playerPosition,b);
+            if(minDistance == -1 ||aux < minDistance ){
+                minDistance = aux;
+            }
+        }
+
+        //player needs to be one block outside box to push
+        return minDistance - 1;
+    }
+
+    private static int manhattanDistance(Point a, Point b){
+        return Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
     }
 }

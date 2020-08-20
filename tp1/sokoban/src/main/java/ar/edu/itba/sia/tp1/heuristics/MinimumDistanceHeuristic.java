@@ -49,4 +49,9 @@ public class MinimumDistanceHeuristic implements Heuristic {
     public Class getModifierRulesClass() {
         return Push.class;
     }
+
+    @Override
+    public String toString() {
+        return "MinimumDistance";
+    }
 }

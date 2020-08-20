@@ -45,7 +45,7 @@ public class Engine {
     /**
      * Returns Rules applied from initial state to goal state.
      */
-    public Optional<Deque<Rule>> solve(){
+    public Optional<Deque<Map.Entry<State,Rule>>> solve(){
         long initialTime = System.currentTimeMillis();
         State initialState = problem.getInitialState();
         Node initialNode = new Node(initialState, 0, null, 0, null);
@@ -60,6 +60,7 @@ public class Engine {
                     continue;
                 }
                 strategy.visit(currentNode);
+                //System.out.println(currentNode.getCost() + "-" + currentNode.getHeuristicValue());
 
                 if (problem.isGoal(currentState)) {
                     goalNode = currentNode;
@@ -96,12 +97,28 @@ public class Engine {
         // TODO: no tengo en cuenta los auxiliares
         metrics.setBoundaryNodes(nodes.size());
 
-        Deque<Rule> rulesApplied = new LinkedList<>();
+        Deque<Map.Entry<State,Rule>> rulesApplied = new LinkedList<>();
 
         while(currentNode.getParent() != null){
-            rulesApplied.push(currentNode.getBirthRule());
+            rulesApplied.push(Map.entry(currentNode.getState(),currentNode.getBirthRule()));
             currentNode = currentNode.getParent();
         }
+        rulesApplied.push(Map.entry(currentNode.getState(), new Rule() {
+            @Override
+            public Optional<State> apply(State state) {
+                return Optional.empty();
+            }
+
+            @Override
+            public int getCost() {
+                return 0;
+            }
+
+            @Override
+            public String getName() {
+                return "Initial State";
+            }
+        }));
 
 
 
