@@ -2,8 +2,8 @@
 map=maps/easy.map #path to map
 strategy=astar
 heuristic=manhattanobstacles #[emptygoals,minimumDistance,manhattanobstacles,emptygoalsp,minimumDistancep,manhattanobstaclesp]
-#min= 5 #For IDDFS &IDGREEDY
-#step= 5      #For IDDFS & IDGREEDY
+#min= 5   #For IDDFS &IDGREEDY
+#step= 5  #For IDDFS & IDGREEDY
 #max= 100 #For IDDFS
 #timeout= 3000 #IDGREEDY
 # In case of BFS,DFS and IDDFS

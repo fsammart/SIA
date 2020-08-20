@@ -18,24 +18,26 @@ public class IDGREEDY extends RandomStrategy implements Strategy {
     Node goal;
     private boolean finished = false;
     private int minCost;
-    private long initialTime;
+    private long initialTime = -1;
     private long timeout;
 
     public IDGREEDY(int step, int minCost, long timeout){
         this.step = step;
         this.currentMaxCost = -1;
         this.minCost = minCost;
-        this.initialTime = System.currentTimeMillis();
         this.timeout = timeout;
     }
 
     @Override
     public boolean needsExploring(Node n) {
+        if(this.initialTime == -1){
+            this.initialTime = System.currentTimeMillis();
+        }
         if(visited.containsKey(n.getState()) && visited.get(n.getState()) <= n.getCost()){
             return false;
         }
 
-        if(currentMaxCost != -1 &&n.getCost() + n.getHeuristicValue() > currentMaxCost){
+        if(currentMaxCost != -1 && (n.getCost() + n.getHeuristicValue() > currentMaxCost)){
             return false;
         }
 
@@ -65,6 +67,10 @@ public class IDGREEDY extends RandomStrategy implements Strategy {
 
     @Override
     public boolean hasFinished() {
+        if(this.initialTime == -1){
+            this.initialTime = System.currentTimeMillis();
+            return false;
+        }
         if(System.currentTimeMillis() - initialTime >= timeout){
             return true;
         }
@@ -89,5 +95,9 @@ public class IDGREEDY extends RandomStrategy implements Strategy {
     @Override
     public String toString() {
         return "IDGREEDY";
+    }
+
+    public int getVisited(){
+        return visited.size();
     }
 }

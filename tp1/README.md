@@ -27,6 +27,11 @@ Results will be saved under the directory `/results` with the name "result + Sys
 To execute the program with the desired parameters a properties file must be created with the name `sokoban.properties`.
 An example can be found at `sokoban.properties.example`
 
+min, max and step are only used with IDDFS and IDGREEDY, otherwise ignored
+In IDDFS: min sets initial depth, step the increase in case solution is not found, and max 
+to stop after reaching max depth.
+In IDGREEDY: just min and step are needed, also timeout should be provided (default is max Int).
+
 ## Map Encoding
 
 In the folder `/maps` there are several maps to try. Encoding is specified here: http://www.game-sokoban.com/index.php?mode=level_info&ulid=2084&view=general

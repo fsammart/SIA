@@ -1,6 +1,7 @@
 package ar.edu.itba.sia.tp1;
 
 import ar.edu.itba.sia.tp1.api.*;
+import ar.edu.itba.sia.tp1.strategies.IDGREEDY;
 
 import java.util.*;
 
@@ -88,7 +89,7 @@ public class Engine {
 
         metrics.setElapsedTime(System.currentTimeMillis() - initialTime);
 
-        if(!strategy.hasFinished() || goalNode == null){
+        if( goalNode == null){
             return Optional.empty();
         }
         metrics.setCost(goalNode.getCost());
