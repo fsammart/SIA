@@ -17,6 +17,10 @@ cd /tp1
 mvn exec:java -Dexec.mainClass=ar.edu.itba.sia.tp1.Main -f runner
 ``
 
+## Results
+
+Results will be saved under the directory `/results` with the name "result + SystemMilis".
+
 ## Configuration File
 
 To execute the program with the desired parameters a properties file must be created with the name `sokoban.properties`.
