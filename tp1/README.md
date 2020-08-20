@@ -4,7 +4,8 @@ This project requires maven to compile.
 
 ```
 cd /tp1
-mvn package
+mvn install
+mvn clean package
 ```
 
 This will generate the .jar to run the project inside `/runner/target`
