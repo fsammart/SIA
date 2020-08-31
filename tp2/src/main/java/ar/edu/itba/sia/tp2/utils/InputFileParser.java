@@ -1,5 +1,6 @@
 package ar.edu.itba.sia.tp2.utils;
 
+import ar.edu.itba.sia.tp2.models.Gene;
 import ar.edu.itba.sia.tp2.models.Token;
 
 import java.io.IOException;
@@ -12,19 +13,19 @@ import java.util.stream.Collectors;
 
 public class InputFileParser {
 
+    private Map<Integer, Token> gloves;
+    private Map<Integer, Token> breastplates;
     private Map<Integer, Token> weapons;
     private Map<Integer, Token> boots;
-    private Map<Integer, Token> heltmets;
-    private Map<Integer, Token> gauntlets;
-    private Map<Integer, Token> chestplates;
+    private Map<Integer, Token> helmets;
 
 
     public InputFileParser() {
-        weapons = parseTokens("fulldata/armas.tsv");
         boots = parseTokens("fulldata/botas.tsv");
-        heltmets = parseTokens("fulldata/cascos.tsv");
-        gauntlets = parseTokens("fulldata/guantes.tsv");
-        chestplates = parseTokens("fulldata/pecheras.tsv");
+        breastplates = parseTokens("fulldata/pecheras.tsv");
+        weapons = parseTokens("fulldata/armas.tsv");
+        helmets = parseTokens("fulldata/cascos.tsv");
+        gloves = parseTokens("fulldata/guantes.tsv");
 
     }
 
@@ -51,35 +52,26 @@ public class InputFileParser {
         return Tokens;
     }
 
-    public Token getRandomToken(Genes type) {
-
-        Integer randomId;
-        Token randomToken;
-        switch (type) {
-            case WEAPON:
-                randomId = SRandom.r.nextInt(weapons.size());
-                randomToken = weapons.get(randomId);
-                break;
-            case BOOTS:
-                randomId = SRandom.r.nextInt(boots.size());
-                randomToken = boots.get(randomId);
-                break;
-            case HELMET:
-                randomId = SRandom.r.nextInt(heltmets.size());
-                randomToken = heltmets.get(randomId);
-                break;
-            case GAUNTLETS:
-                randomId = SRandom.r.nextInt(gauntlets.size());
-                randomToken = gauntlets.get(randomId);
-                break;
-            case CHESTPLATE:
-                randomId = SRandom.r.nextInt(chestplates.size());
-                randomToken = chestplates.get(randomId);
-                break;
-            default:
-                randomToken = null;
-        }
-        return randomToken;
+    public Map<Integer, Token> getGloves() {
+        return gloves;
     }
+
+    public Map<Integer, Token> getBreastplates() {
+        return breastplates;
+    }
+
+    public Map<Integer, Token> getWeapons() {
+        return weapons;
+    }
+
+    public Map<Integer, Token> getBoots() {
+        return boots;
+    }
+
+    public Map<Integer, Token> getHelmets() {
+        return helmets;
+    }
+
+
 
 }
