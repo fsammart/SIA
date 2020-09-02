@@ -13,8 +13,11 @@ public class Selection {
         int size2 = size - size1;
 
         List<Warrior> selected = sm1.select(warriors,size1,combat_size,generation);
-        selected.addAll(sm2.select(warriors,size2,combat_size,generation));
-
+        List<Warrior> selected2 = sm2.select(warriors,size2,combat_size,generation);
+        if(selected2.size() == 0){
+            System.out.println("HOLIS");
+        }
+        selected.addAll(selected2);
         return selected;
     }
 }

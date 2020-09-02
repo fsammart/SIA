@@ -32,8 +32,8 @@ public class ConfigParser {
     private Double mutationProbability;
 
     private CrossoverType crossoverType;
-    //private CrossoverPair crossoverPair;
     private Double crossoverProbability;
+    private CrossoverParentSelection crossoverParentSelection;
 
     private ReplacementType replacementType;
     private SelectionMethod replacementMethod1;
@@ -42,13 +42,11 @@ public class ConfigParser {
 
     private Double attackCoefficient;
     private Double defenseCoefficient;
-    private Double strengthCoefficient;
-    private Double agilityCoefficient;
-    private Double expertiseCoefficient;
-    private Double resistanceCoefficient;
-    private Double vitalityCoefficient;
-    private int recolectionPeriod;
+
     private long time;
+    private boolean mutationHeat;
+
+    private long seed;
 
 
     public void getPropValues() throws IOException {
@@ -68,14 +66,11 @@ public class ConfigParser {
 
             attackCoefficient = Double.parseDouble(p.getProperty("ATTACK_COEFFICIENT", "0.9"));
             defenseCoefficient = Double.parseDouble(p.getProperty("DEFENSE_COEFFICIENT", "0.1"));
-            strengthCoefficient = Double.parseDouble(p.getProperty("STRENGTH_COEFFICIENT", "0.8"));
-            agilityCoefficient = Double.parseDouble(p.getProperty("AGILITY_COEFFICIENT", "1.1"));
-            expertiseCoefficient = Double.parseDouble(p.getProperty("EXPERTISE_COEFFICIENT", "1.1"));
-            resistanceCoefficient = Double.parseDouble(p.getProperty("RESISTANCE_COEFFICIENT", "0.9"));
-            vitalityCoefficient = Double.parseDouble(p.getProperty("VITALITY_COEFFICIENT", "0.7"));
+
 
             mutationProbability = Double.parseDouble(p.getProperty("MUTATION_PROBABILITY"));
             mutationType = MutationType.valueOf(p.getProperty("MUTATION_TYPE"));
+            mutationHeat = Boolean.valueOf(p.getProperty("MUTATION_HEAT"));
 
             selectionMethod1 = SelectionMethod.valueOf(p.getProperty("SELECTION_METHOD_1"));
             selectionMethod2 = SelectionMethod.valueOf(p.getProperty("SELECTION_METHOD_2"));
@@ -88,8 +83,10 @@ public class ConfigParser {
             else tournamentCombatants = 0;
 
             crossoverType = CrossoverType.valueOf(p.getProperty("CROSSOVER_TYPE"));
-            //crossoverPair = CrossoverPair.valueOf(p.getProperty("CROSSOVER_PAIR"));
             crossoverProbability = Double.parseDouble(p.getProperty("CROSSOVER_PROBABILITY"));
+            crossoverParentSelection = CrossoverParentSelection.valueOf(p.getProperty("CROSSOVER_COUPLE_SELECTION"));
+
+
             stopCriteria = StopCriteria.valueOf(p.getProperty("STOP_CRITERIA"));
             if(stopCriteria == StopCriteria.TIME) {
                 time = Long.parseLong(p.getProperty("TIME"));
@@ -108,7 +105,7 @@ public class ConfigParser {
 
             poolSize = Integer.parseInt(p.getProperty("POOL_SIZE"));
 
-            recolectionPeriod = Integer.parseInt(p.getProperty("RECOLECTION_PERIOD"));
+            seed = Long.parseLong(p.getProperty("SEED"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,32 +208,128 @@ public class ConfigParser {
         return defenseCoefficient;
     }
 
-    public Double getStrengthCoefficient() {
-        return strengthCoefficient;
-    }
 
-    public Double getAgilityCoefficient() {
-        return agilityCoefficient;
+    public boolean isMutationHeat() {
+        return mutationHeat;
     }
-
-    public Double getExpertiseCoefficient() {
-        return expertiseCoefficient;
-    }
-
-    public Double getResistanceCoefficient() {
-        return resistanceCoefficient;
-    }
-
-    public Double getVitalityCoefficient() {
-        return vitalityCoefficient;
-    }
-
-    public int getRecolectionPeriod() {
-        return recolectionPeriod;
-    }
-
 
     public long getTime() {
         return time;
+    }
+
+    public CrossoverParentSelection getCrossoverParentSelection() {
+        return crossoverParentSelection;
+    }
+
+    public long getSeed() {
+        return seed;
+    }
+
+    public void setInputStream(FileInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    public void setPoolSize(Integer poolSize) {
+        this.poolSize = poolSize;
+    }
+
+    public void setSelectionMethod1(SelectionMethod selectionMethod1) {
+        this.selectionMethod1 = selectionMethod1;
+    }
+
+    public void setSelectionMethod2(SelectionMethod selectionMethod2) {
+        this.selectionMethod2 = selectionMethod2;
+    }
+
+    public void setSelectionMethod1Percentage(Float selectionMethod1Percentage) {
+        this.selectionMethod1Percentage = selectionMethod1Percentage;
+    }
+
+    public void setSelectionQuantity(Integer selectionQuantity) {
+        this.selectionQuantity = selectionQuantity;
+    }
+
+    public void setTournamentCombatants(Integer tournamentCombatants) {
+        this.tournamentCombatants = tournamentCombatants;
+    }
+
+    public void setStopCriteria(StopCriteria stopCriteria) {
+        this.stopCriteria = stopCriteria;
+    }
+
+    public void setMaxGenerations(Integer maxGenerations) {
+        this.maxGenerations = maxGenerations;
+    }
+
+    public void setBestCharacterRepetitionLimit(Integer bestCharacterRepetitionLimit) {
+        this.bestCharacterRepetitionLimit = bestCharacterRepetitionLimit;
+    }
+
+    public void setMaxRepeatedPercentageGenerations(Integer maxRepeatedPercentageGenerations) {
+        this.maxRepeatedPercentageGenerations = maxRepeatedPercentageGenerations;
+    }
+
+    public void setPoolRepetitionPercentageLimit(Double poolRepetitionPercentageLimit) {
+        this.poolRepetitionPercentageLimit = poolRepetitionPercentageLimit;
+    }
+
+    public void setFitnessOptimum(Double fitnessOptimum) {
+        this.fitnessOptimum = fitnessOptimum;
+    }
+
+    public void setMutationType(MutationType mutationType) {
+        this.mutationType = mutationType;
+    }
+
+    public void setMutationProbability(Double mutationProbability) {
+        this.mutationProbability = mutationProbability;
+    }
+
+    public void setCrossoverType(CrossoverType crossoverType) {
+        this.crossoverType = crossoverType;
+    }
+
+    public void setCrossoverProbability(Double crossoverProbability) {
+        this.crossoverProbability = crossoverProbability;
+    }
+
+    public void setCrossoverParentSelection(CrossoverParentSelection crossoverParentSelection) {
+        this.crossoverParentSelection = crossoverParentSelection;
+    }
+
+    public void setReplacementType(ReplacementType replacementType) {
+        this.replacementType = replacementType;
+    }
+
+    public void setReplacementMethod1(SelectionMethod replacementMethod1) {
+        this.replacementMethod1 = replacementMethod1;
+    }
+
+    public void setReplacementMethod2(SelectionMethod replacementMethod2) {
+        this.replacementMethod2 = replacementMethod2;
+    }
+
+    public void setReplacementMethod1Percentage(Float replacementMethod1Percentage) {
+        this.replacementMethod1Percentage = replacementMethod1Percentage;
+    }
+
+    public void setAttackCoefficient(Double attackCoefficient) {
+        this.attackCoefficient = attackCoefficient;
+    }
+
+    public void setDefenseCoefficient(Double defenseCoefficient) {
+        this.defenseCoefficient = defenseCoefficient;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public void setMutationHeat(boolean mutationHeat) {
+        this.mutationHeat = mutationHeat;
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
     }
 }

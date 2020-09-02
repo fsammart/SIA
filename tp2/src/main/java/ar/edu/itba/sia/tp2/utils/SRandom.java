@@ -8,9 +8,10 @@ import java.util.Random;
 
 public class SRandom {
 
-    public static Random r = new Random(System.currentTimeMillis());
 
     public static InputFileParser ifp;
+    public static long seed;
+    public static Random r = new Random(seed);
 
     public static double randomDouble(double min, double max) {
         if (min > max) {

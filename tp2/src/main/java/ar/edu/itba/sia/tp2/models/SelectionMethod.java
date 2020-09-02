@@ -50,8 +50,11 @@ public enum SelectionMethod {
     public abstract List<Warrior> select(List<Warrior> l, int size, int combat_size, int generation);
 
     private static List<Warrior> boltzmannRoulette(List<Warrior> Warriors, int k, int generations) {
-        double temperature = 100.0 / (generations + 1) + 0.001;
+        double temperature = 10 + (1000 - 10) * Math.exp((-0.005) * generations);
         double avgValue = averageBoltzmannExpression(Warriors, temperature);
+        if(Double.isInfinite(avgValue)){
+            System.out.println("HOLA");
+        }
         double randomNumbers[] = SRandom.r.doubles(k).toArray();
         Double fitness[] = Warriors.stream().map(c -> Math.exp(c.getFitness() / temperature) / avgValue)
                 .toArray(Double[]::new);
@@ -61,8 +64,8 @@ public enum SelectionMethod {
 
     private static double averageBoltzmannExpression(List<Warrior> Warriors, double temperature) {
         return Warriors.stream()
-                .map(c -> Math.exp(c.getFitness() / temperature))
-                .reduce(0.0, Double::sum) / Warriors.size();
+                .map(c -> Math.exp(c.getFitness() / temperature)/Warriors.size())
+                .reduce(0.0, Double::sum);
 
     }
 
@@ -163,6 +166,9 @@ public enum SelectionMethod {
                 }
             }
             firstFound = false;
+        }
+        if(selection.isEmpty()){
+            System.out.println("HOLIS");
         }
         return selection;
     }

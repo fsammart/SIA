@@ -1,13 +1,20 @@
 package ar.edu.itba.sia.tp2.solver;
 
 import ar.edu.itba.sia.tp2.models.Gene;
+import ar.edu.itba.sia.tp2.models.StopCriteria;
 import ar.edu.itba.sia.tp2.models.Warrior;
 import ar.edu.itba.sia.tp2.utils.ConfigParser;
 import ar.edu.itba.sia.tp2.utils.InputFileParser;
 import ar.edu.itba.sia.tp2.utils.SRandom;
+import javafx.scene.layout.StackPane;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -20,30 +27,38 @@ public class GeneticEngine {
 
     private ConfigParser cp;
     private InputFileParser ifp;
-
+    private PrintStream ps;
+    private PrintStream syso;
     //state variables
 
     private int generation;
+    private List<DoubleSummaryStatistics> summary;
 
-    public GeneticEngine(ConfigParser cp, InputFileParser ifp){
+    public GeneticEngine(ConfigParser cp, InputFileParser ifp) throws IOException {
         this.cp = cp;
+        StopCriteria.cp = cp;
+        this.summary = new ArrayList<>(2000);
         this.ifp = ifp;
         this.generation = 0;
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
         SRandom.ifp = ifp;
-        Warrior.setCoefficients(cp.getAttackCoefficient(), cp.getDefenseCoefficient(),
-                cp.getStrengthCoefficient(), cp.getAgilityCoefficient(),
-                cp.getExpertiseCoefficient(), cp.getResistanceCoefficient(),
-                cp.getVitalityCoefficient());
+        if(cp.getSeed() != 0){
+            SRandom.seed = cp.getSeed();
+        } else{
+            SRandom.seed = System.currentTimeMillis();
+        }
+
+        Warrior.setCoefficients(cp.getAttackCoefficient(), cp.getDefenseCoefficient());
+
 
     }
 
     public Warrior run(){
         initialPopulation();
 
-        while(hasFinished()){
+        while(!hasFinished()){
             children.clear();
 
             // 1.SELECTION
@@ -54,11 +69,12 @@ public class GeneticEngine {
 
             // 2.CROSS_OVER
 
-            children = Crossover.crossover(selection, cp.getCrossoverType());
+            children = Crossover.crossover(selection, cp.getCrossoverType(),
+                    cp.getCrossoverProbability(), cp.getCrossoverParentSelection());
 
             // 3.CHILDREN MUTATIONS - In-Site operation
 
-            Mutation.mutate(children, cp.getMutationType() , generation, cp.getMutationProbability());
+            Mutation.mutate(children, cp.getMutationType() , generation, cp.getMutationProbability(), cp.isMutationHeat());
 
             // 4.REPLACEMENT
             this.prevGeneration.clear();
@@ -75,12 +91,12 @@ public class GeneticEngine {
 
         }
 
-        return null;
+        return Warrior.getBestWarrior();
     }
 
     // TODO: other end criteria
     private boolean hasFinished() {
-        return generation <= cp.getMaxGenerations();
+       return cp.getStopCriteria().hasFinished(prevGeneration, population, generation);
     }
 
     private void initialPopulation(){
@@ -91,10 +107,13 @@ public class GeneticEngine {
     }
 
     private void printStatistics(){
-        population.sort(Comparator.naturalOrder());
-        System.out.println("Generation: " + generation);
-        for(int i = 0; i < 5; i++){
-            System.out.println(population.get(population.size() - 1 - i));
-        }
+        System.setOut(ps);
+
+        DoubleSummaryStatistics d = population.stream().mapToDouble(Warrior::getFitness).summaryStatistics();
+        summary.add(d);
+    }
+
+    public List<DoubleSummaryStatistics> getSummary() {
+        return summary;
     }
 }

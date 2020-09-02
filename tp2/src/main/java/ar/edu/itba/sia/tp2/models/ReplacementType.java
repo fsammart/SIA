@@ -13,7 +13,11 @@ public enum ReplacementType {
                                             List<Warrior> children, SelectionMethod rm1,
                                             SelectionMethod rm2,int sizeCombat, double percentage,
                                             int generation) {
+
             int n = prevGeneration.size();
+            if(n < 300){
+                System.out.println("hola");
+            }
             List<Warrior> total = prevGeneration;
             total.addAll(children);
             Collections.shuffle(total);

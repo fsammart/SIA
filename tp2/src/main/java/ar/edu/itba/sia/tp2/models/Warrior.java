@@ -1,16 +1,14 @@
 package ar.edu.itba.sia.tp2.models;
 
+import java.util.Objects;
+
 public class Warrior implements Comparable<Warrior> {
 
     // coefficients for current warrior.
     private static double attackCoefficient;
     private static double defenseCoefficient;
 
-    private static double strengthCoefficient;
-    private static double agilityCoefficient;
-    private static double expertiseCoefficient;
-    private static double resistanceCoefficient;
-    private static double vitalityCoefficient;
+    private static Warrior bestWarrior = null;
 
     private static int geneNumber = 6;
 
@@ -24,17 +22,10 @@ public class Warrior implements Comparable<Warrior> {
 
     private double fitness;
 
-    public static void setCoefficients(double attackCoefficient, double defenseCoefficient, double strengthCoefficient,
-                                       double agilityCoefficient, double expertiseCoefficient,
-                                       double resistanceCoefficient, double vitalityCoefficient){
-        Warrior.agilityCoefficient = attackCoefficient;
+    public static void setCoefficients(double attackCoefficient, double defenseCoefficient){
+        Warrior.attackCoefficient = attackCoefficient;
         Warrior.defenseCoefficient = defenseCoefficient;
 
-        Warrior.strengthCoefficient = strengthCoefficient;
-        Warrior.expertiseCoefficient = expertiseCoefficient;
-        Warrior.vitalityCoefficient = vitalityCoefficient;
-        Warrior.resistanceCoefficient = resistanceCoefficient;
-        Warrior.agilityCoefficient = agilityCoefficient;
     }
 
     public Warrior(Token weapon, Token boots, Token helmet, Token gloves, Token breastPlate, double height){
@@ -45,6 +36,7 @@ public class Warrior implements Comparable<Warrior> {
         this.breastPlate = breastPlate;
         this.height = height;
         getFitness();
+
     }
 
     public Double getFitness() {
@@ -66,35 +58,35 @@ public class Warrior implements Comparable<Warrior> {
         Double itemAgility = helmet.getAgility() + weapon.getAgility() + boots.getAgility() +
                 gloves.getAgility() + breastPlate.getAgility();
 
-        return Math.tanh(0.01 * itemAgility * agilityCoefficient);
+        return Math.tanh(0.01 * itemAgility );
     }
 
     public Double getResistance() {
         Double itemResistance = helmet.getResistance() + weapon.getResistance() + boots.getResistance() +
                 gloves.getResistance() + breastPlate.getResistance();
 
-        return Math.tanh(0.01 * itemResistance * resistanceCoefficient);
+        return Math.tanh(0.01 * itemResistance );
     }
 
     public Double getExpertise() {
         Double itemExpertise = helmet.getExpertise() + weapon.getExpertise() + boots.getExpertise() +
                 gloves.getExpertise() + breastPlate.getExpertise();
 
-        return 0.6 * Math.tanh(0.01 * itemExpertise * expertiseCoefficient);
+        return 0.6 * Math.tanh(0.01 * itemExpertise );
     }
 
     public Double getStrength() {
         Double itemStrength = helmet.getStrength() + weapon.getStrength() + boots.getStrength() +
                 gloves.getStrength() + breastPlate.getStrength();
 
-        return 100 * Math.tanh(0.01 * itemStrength * strengthCoefficient);
+        return 100 * Math.tanh(0.01 * itemStrength  );
     }
 
     public Double getVitality() {
         Double itemVitality = helmet.getVitality() + weapon.getVitality() + boots.getVitality() +
                 gloves.getVitality() + breastPlate.getVitality();
 
-        return 100 * Math.tanh(0.01 * itemVitality * vitalityCoefficient);
+        return 100 * Math.tanh(0.01 * itemVitality );
     }
 
     public Double getAttackHeightModifier() {
@@ -206,5 +198,47 @@ public class Warrior implements Comparable<Warrior> {
                 "\nBreastPlate: " + breastPlate +
                 "\nHeight: " + height +
                 "\nFitness: " + getFitness();
+    }
+
+    public static Warrior getBestWarrior() {
+        return bestWarrior;
+    }
+
+    public boolean isApproximateEqualTo(Warrior o){
+        if (this == o) return true;
+        if(o == null) return false;
+
+        return Math.abs(o.height - height) <= 0.001 &&
+                Double.compare(o.getFitness(), getFitness()) == 0 &&
+                Objects.equals(weapon, o.weapon) &&
+                Objects.equals(boots, o.boots) &&
+                Objects.equals(helmet, o.helmet) &&
+                Objects.equals(gloves, o.gloves) &&
+                Objects.equals(breastPlate, o.breastPlate);
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Warrior warrior = (Warrior) o;
+        return  Double.compare(warrior.height,height) == 0 &&
+                Double.compare(warrior.getFitness(), getFitness()) == 0 &&
+                Objects.equals(weapon, warrior.weapon) &&
+                Objects.equals(boots, warrior.boots) &&
+                Objects.equals(helmet, warrior.helmet) &&
+                Objects.equals(gloves, warrior.gloves) &&
+                Objects.equals(breastPlate, warrior.breastPlate);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(weapon, boots, helmet, gloves, breastPlate, height, getFitness());
+    }
+
+    public static void setBestWarrior(Warrior bestWarrior) {
+        Warrior.bestWarrior = bestWarrior;
     }
 }
