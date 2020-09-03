@@ -35,6 +35,7 @@ public enum CrossoverType {
 
     private static List<Warrior> singlePointCrossover(Warrior p1, Warrior p2) {
         Integer firstGene = SRandom.r.nextInt(Warrior.getGeneNumber());
+        //TODO: check <=6
         return crossover(p1,p2,firstGene, Warrior.getGeneNumber());
 
     }
@@ -65,6 +66,7 @@ public enum CrossoverType {
         List<Warrior> children =  new ArrayList<Warrior>(List.of(p1.clone(), p2.clone()));
         Arrays.stream(Gene.values()).forEach(gene ->{
             double p = SRandom.r.nextDouble();
+            // TODO: check probability
             if(p < 0.5) {
                 changeGene(gene,p1,p2,children.get(0),children.get(1));
             }

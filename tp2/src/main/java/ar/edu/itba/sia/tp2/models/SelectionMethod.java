@@ -167,9 +167,6 @@ public enum SelectionMethod {
             }
             firstFound = false;
         }
-        if(selection.isEmpty()){
-            System.out.println("HOLIS");
-        }
         return selection;
     }
 }

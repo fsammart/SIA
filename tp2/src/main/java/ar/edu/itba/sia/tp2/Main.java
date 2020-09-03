@@ -34,13 +34,13 @@ public class Main {
         ConfigParser cp = new ConfigParser();
         cp.getPropValues();
 
-        InputFileParser ifp = new InputFileParser();
+        InputFileParser ifp = new InputFileParser(cp.getInputFilePath());
 
-        GeneticEngine ge = new GeneticEngine(cp, ifp);
+        GeneticEngine ge = new GeneticEngine(cp, ifp, true);
 
         Warrior best = ge.run();
         printStatistics(ge.getSummary());
-        System.out.println("BEST WARRIOR");
+        System.out.println("BEST CHARACTER");
         System.out.println(best);
 
     }

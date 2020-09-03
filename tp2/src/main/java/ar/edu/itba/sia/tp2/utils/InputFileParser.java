@@ -20,12 +20,12 @@ public class InputFileParser {
     private Map<Integer, Token> helmets;
 
 
-    public InputFileParser() {
-        boots = parseTokens("fulldata/botas.tsv");
-        breastplates = parseTokens("fulldata/pecheras.tsv");
-        weapons = parseTokens("fulldata/armas.tsv");
-        helmets = parseTokens("fulldata/cascos.tsv");
-        gloves = parseTokens("fulldata/guantes.tsv");
+    public InputFileParser(String path) {
+        boots = parseTokens(path + "/botas.tsv");
+        breastplates = parseTokens(path + "/pecheras.tsv");
+        weapons = parseTokens(path + "/armas.tsv");
+        helmets = parseTokens(path + "/cascos.tsv");
+        gloves = parseTokens(path + "/guantes.tsv");
 
     }
 

@@ -15,9 +15,7 @@ public enum ReplacementType {
                                             int generation) {
 
             int n = prevGeneration.size();
-            if(n < 300){
-                System.out.println("hola");
-            }
+
             List<Warrior> total = prevGeneration;
             total.addAll(children);
             Collections.shuffle(total);

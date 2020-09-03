@@ -38,11 +38,11 @@ public class Analysis {
         ConfigParser cp = new ConfigParser();
         cp.getPropValues();
 
-        InputFileParser ifp = new InputFileParser();
+        InputFileParser ifp = new InputFileParser(cp.getInputFilePath());
 
         for(CrossoverParentSelection cps : CrossoverParentSelection.values()){
             cp.setCrossoverParentSelection(cps);
-            GeneticEngine ge = new GeneticEngine(cp, ifp);
+            GeneticEngine ge = new GeneticEngine(cp, ifp, false);
             ge.run();
             printStatistics(ge.getSummary(), cp);
         }

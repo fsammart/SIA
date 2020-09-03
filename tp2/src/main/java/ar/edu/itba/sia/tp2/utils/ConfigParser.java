@@ -48,6 +48,8 @@ public class ConfigParser {
 
     private long seed;
 
+    private String inputFilePath;
+
 
     public void getPropValues() throws IOException {
 
@@ -62,6 +64,9 @@ public class ConfigParser {
             } else {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
+
+
+            inputFilePath = p.getProperty("INPUT_FILE_PATH");
 
 
             attackCoefficient = Double.parseDouble(p.getProperty("ATTACK_COEFFICIENT", "0.9"));
@@ -331,5 +336,9 @@ public class ConfigParser {
 
     public void setSeed(long seed) {
         this.seed = seed;
+    }
+
+    public String getInputFilePath() {
+        return inputFilePath;
     }
 }

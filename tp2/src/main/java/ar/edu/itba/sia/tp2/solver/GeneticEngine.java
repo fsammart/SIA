@@ -16,9 +16,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XYChart;
+import org.w3c.dom.DOMImplementation;
+
+
 public class GeneticEngine {
+
+
 
     private List<Warrior> population;
     private List<Warrior> children;
@@ -33,8 +42,16 @@ public class GeneticEngine {
 
     private int generation;
     private List<DoubleSummaryStatistics> summary;
+    private List<Double> generations;
+    private List<Double> maxFit;
+    private List<Double> avgFit;
+    private List<Double> minFit;
+    private String[] axis = List.of("max_fit","avg_git","min_fit").toArray(new String[3]);
+    XYChart chart;
+    SwingWrapper<XYChart> sw ;
+    private boolean graph;
 
-    public GeneticEngine(ConfigParser cp, InputFileParser ifp) throws IOException {
+    public GeneticEngine(ConfigParser cp, InputFileParser ifp, boolean graph) throws IOException {
         this.cp = cp;
         StopCriteria.cp = cp;
         this.summary = new ArrayList<>(2000);
@@ -43,6 +60,7 @@ public class GeneticEngine {
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
+        this.graph = graph;
         SRandom.ifp = ifp;
         if(cp.getSeed() != 0){
             SRandom.seed = cp.getSeed();
@@ -50,7 +68,26 @@ public class GeneticEngine {
             SRandom.seed = System.currentTimeMillis();
         }
 
+        generations = new ArrayList<>(100);
+        maxFit = new ArrayList<>(100);
+        avgFit = new ArrayList<>(100);
+        minFit = new ArrayList<>(100);
+
         Warrior.setCoefficients(cp.getAttackCoefficient(), cp.getDefenseCoefficient());
+        generations.add(0,Double.valueOf(0));
+        maxFit.add(0,Double.valueOf(0));
+        avgFit.add(0,Double.valueOf(0));
+        minFit.add(0, Double.valueOf(0));
+
+        // Create Chart
+        chart = QuickChart.getChart("Fitness Evolution",
+                "Generation", "Fitness","max_fit" , generations, maxFit);
+        chart.addSeries("avg_fit", generations, avgFit);
+        chart.addSeries("min_fit", generations, minFit);
+        if(graph) {
+            sw = new SwingWrapper<XYChart>(chart);
+            sw.displayChart();
+        }
 
 
     }
@@ -111,6 +148,20 @@ public class GeneticEngine {
 
         DoubleSummaryStatistics d = population.stream().mapToDouble(Warrior::getFitness).summaryStatistics();
         summary.add(d);
+        generations.add(generation, Double.valueOf(generation));
+        maxFit.add(generation, d.getMax());
+        avgFit.add(generation, d.getAverage());
+        minFit.add(generation, d.getMin());
+
+        if(graph) updateGraph();
+    }
+
+    private  void updateGraph(){
+        chart.updateXYSeries("max_fit", generations, maxFit, null);
+        chart.updateXYSeries("avg_fit", generations, avgFit, null);
+        chart.updateXYSeries("min_fit", generations, minFit, null);
+
+        sw.repaintChart();
     }
 
     public List<DoubleSummaryStatistics> getSummary() {

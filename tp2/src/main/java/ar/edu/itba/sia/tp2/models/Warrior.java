@@ -102,61 +102,17 @@ public class Warrior implements Comparable<Warrior> {
         return Double.compare(getFitness(), o.getFitness());
     }
 
-    public Token getWeapon() {
-        return weapon;
-    }
-
-    public Token getBoots() {
-        return boots;
-    }
-
-    public Token getHelmet() {
-        return helmet;
-    }
-
-    public Token getGloves() {
-        return gloves;
-    }
-
-    public Token getBreastPlate() {
-        return breastPlate;
-    }
-
-    public double getHeight() {
-        return height;
-    }
 
     public static void setAttackCoefficient(double attackCoefficient) {
         Warrior.attackCoefficient = attackCoefficient;
     }
 
-    public void setWeapon(Token weapon) {
-        this.weapon = weapon;
-    }
-
-    public void setBoots(Token boots) {
-        this.boots = boots;
-    }
-
-    public void setHelmet(Token helmet) {
-        this.helmet = helmet;
-    }
-
-    public void setGloves(Token gloves) {
-        this.gloves = gloves;
-    }
-
-    public void setBreastPlate(Token breastPlate) {
-        this.breastPlate = breastPlate;
-    }
 
     public void setHeight(double height) {
         this.height = height;
+        getFitness();
     }
 
-    public void setFitness(double fitness) {
-        this.fitness = fitness;
-    }
 
     @Override
     public Warrior clone() {
@@ -176,6 +132,7 @@ public class Warrior implements Comparable<Warrior> {
             case GLOVES: this.gloves = t; break;
             case BREASTPLATE: this.breastPlate = t; break;
         }
+        getFitness();
     }
 
     public Token getToken(Gene type){
@@ -196,8 +153,8 @@ public class Warrior implements Comparable<Warrior> {
                 "\nHelmet: " + helmet +
                 "\nGloves: " + gloves+
                 "\nBreastPlate: " + breastPlate +
-                "\nHeight: " + height +
-                "\nFitness: " + getFitness();
+                "\nHeight: " + String.format("%.4f",height) +
+                "\nFitness: " + String.format("%.4f",fitness);
     }
 
     public static Warrior getBestWarrior() {
@@ -209,7 +166,7 @@ public class Warrior implements Comparable<Warrior> {
         if(o == null) return false;
 
         return Math.abs(o.height - height) <= 0.001 &&
-                Double.compare(o.getFitness(), getFitness()) == 0 &&
+                Double.compare(o.fitness, this.fitness) == 0 &&
                 Objects.equals(weapon, o.weapon) &&
                 Objects.equals(boots, o.boots) &&
                 Objects.equals(helmet, o.helmet) &&
@@ -224,7 +181,7 @@ public class Warrior implements Comparable<Warrior> {
         if (o == null || getClass() != o.getClass()) return false;
         Warrior warrior = (Warrior) o;
         return  Double.compare(warrior.height,height) == 0 &&
-                Double.compare(warrior.getFitness(), getFitness()) == 0 &&
+                Double.compare(warrior.fitness, this.fitness) == 0 &&
                 Objects.equals(weapon, warrior.weapon) &&
                 Objects.equals(boots, warrior.boots) &&
                 Objects.equals(helmet, warrior.helmet) &&
@@ -235,7 +192,7 @@ public class Warrior implements Comparable<Warrior> {
     @Override
     public int hashCode() {
 
-        return Objects.hash(weapon, boots, helmet, gloves, breastPlate, height, getFitness());
+        return Objects.hash(weapon, boots, helmet, gloves, breastPlate, height, fitness);
     }
 
     public static void setBestWarrior(Warrior bestWarrior) {
