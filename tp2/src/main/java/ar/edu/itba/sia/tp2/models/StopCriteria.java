@@ -49,7 +49,7 @@ public enum StopCriteria {
                 repeatedGenerationsContent = 0;
                 return false;
             }
-            return repeatedGenerationsContent.equals(cp.getBestCharacterRepetitionLimit());
+            return repeatedGenerationsContent >= cp.getBestCharacterRepetitionLimit();
         }
     }, STRUCTURE{
         @Override
@@ -67,7 +67,7 @@ public enum StopCriteria {
 
             if (repeatedCharacters / currentGeneration.size() > cp.getPoolRepetitionPercentageLimit()) {
                 repeatedGenerationsStructure++;
-                if (repeatedGenerationsStructure.equals(cp.getMaxRepeatedPercentageGenerations())) {
+                if (repeatedGenerationsStructure >= cp.getMaxRepeatedPercentageGenerations()) {
                     return true;
                 }
                 return false;

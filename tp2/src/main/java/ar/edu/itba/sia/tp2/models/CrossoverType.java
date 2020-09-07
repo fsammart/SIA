@@ -18,6 +18,11 @@ public enum CrossoverType {
         public List<Warrior> crossOver(Warrior p1, Warrior p2) {
             return uniformCrossover(p1,p2);
         }
+    }, UNIFORM_CONTINUOUS{
+        @Override
+        public List<Warrior> crossOver(Warrior p1, Warrior p2) {
+            return uniformContinuousCrossover(p1,p2);
+        }
     }, SINGLE_POINT{
         @Override
         public List<Warrior> crossOver(Warrior p1, Warrior p2) {
@@ -35,7 +40,6 @@ public enum CrossoverType {
 
     private static List<Warrior> singlePointCrossover(Warrior p1, Warrior p2) {
         Integer firstGene = SRandom.r.nextInt(Warrior.getGeneNumber());
-        //TODO: check <=6
         return crossover(p1,p2,firstGene, Warrior.getGeneNumber());
 
     }
@@ -74,6 +78,18 @@ public enum CrossoverType {
         return children;
     }
 
+    private static List<Warrior> uniformContinuousCrossover(Warrior p1, Warrior p2) {
+        List<Warrior> children =  new ArrayList<Warrior>(List.of(p1.clone(), p2.clone()));
+        Arrays.stream(Gene.values()).forEach(gene ->{
+            double p = SRandom.r.nextDouble();
+            // TODO: check probability
+            if(p < 0.5) {
+                changeGeneContinuous(gene,p1,p2,children.get(0),children.get(1));
+            }
+        });
+        return children;
+    }
+
     private static List<Warrior> annularCrossover(Warrior p1, Warrior p2) {
         List<Warrior> children =  new ArrayList<Warrior>(List.of(p1.clone(), p2.clone()));
         int geneIndex = SRandom.r.nextInt(Warrior.getGeneNumber());
@@ -84,6 +100,17 @@ public enum CrossoverType {
         });
 
         return children;
+    }
+
+    private static void changeGeneContinuous(Gene gene,Warrior p1, Warrior p2, Warrior c1, Warrior c2) {
+        if(Gene.HEIGHT.equals(gene)){
+            double height = (p1.getHeight() + p2.getHeight())/2;
+            c2.setHeight(height);
+            c1.setHeight(height);
+        }else {
+            c2.setToken(gene, p1.getToken(gene));
+            c1.setToken(gene, p2.getToken(gene));
+        }
     }
 
     private static void changeGene(Gene gene,Warrior p1, Warrior p2, Warrior c1, Warrior c2) {

@@ -32,7 +32,7 @@ public enum SelectionMethod {
     }, TOURNAMENTS_P {
         @Override
         public List<Warrior> select(List<Warrior> l, int size,int combat_size, int generation) {
-            return tournamentProbabilistic(l, size, combat_size,0.75);
+            return tournamentProbabilistic(l, size, 2,0.75);
         }
     }, BOLTZMANN_ROULETTE {
         @Override
@@ -44,6 +44,12 @@ public enum SelectionMethod {
         public List<Warrior> select(List<Warrior> l, int size,int combat_size, int generation) {
             return universal(l, size);
         }
+    }, RANDOM {
+        @Override
+        public List<Warrior> select(List<Warrior> l, int size,int combat_size, int generation) {
+            Collections.shuffle(l);
+            return l.subList(0, size);
+        }
     };
 
 
@@ -52,9 +58,6 @@ public enum SelectionMethod {
     private static List<Warrior> boltzmannRoulette(List<Warrior> Warriors, int k, int generations) {
         double temperature = 10 + (1000 - 10) * Math.exp((-0.005) * generations);
         double avgValue = averageBoltzmannExpression(Warriors, temperature);
-        if(Double.isInfinite(avgValue)){
-            System.out.println("HOLA");
-        }
         double randomNumbers[] = SRandom.r.doubles(k).toArray();
         Double fitness[] = Warriors.stream().map(c -> Math.exp(c.getFitness() / temperature) / avgValue)
                 .toArray(Double[]::new);

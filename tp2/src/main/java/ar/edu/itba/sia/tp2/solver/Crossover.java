@@ -16,6 +16,10 @@ public class Crossover {
                                           double probability, CrossoverParentSelection cps) {
         List<Warrior> children = new ArrayList<>(parents.size());
         List<Map.Entry<Warrior,Warrior>> couples = cps.getCouples(parents);
+        if(parents.size()%2 ==1){
+            // NOT RECOMMENDED
+            children.add(parents.get(parents.size()/2));
+        }
         couples.forEach(e -> {
             List<Warrior> aux;
             if(SRandom.r.nextDouble() > probability){

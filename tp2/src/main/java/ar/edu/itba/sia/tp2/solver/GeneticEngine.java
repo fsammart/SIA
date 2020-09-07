@@ -4,6 +4,7 @@ import ar.edu.itba.sia.tp2.models.Gene;
 import ar.edu.itba.sia.tp2.models.StopCriteria;
 import ar.edu.itba.sia.tp2.models.Warrior;
 import ar.edu.itba.sia.tp2.utils.ConfigParser;
+import ar.edu.itba.sia.tp2.utils.Diversity;
 import ar.edu.itba.sia.tp2.utils.InputFileParser;
 import ar.edu.itba.sia.tp2.utils.SRandom;
 import javafx.scene.layout.StackPane;
@@ -12,10 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -46,9 +44,13 @@ public class GeneticEngine {
     private List<Double> maxFit;
     private List<Double> avgFit;
     private List<Double> minFit;
+    private Map<Gene, List<Double>> diversityMap;
+    private List<Double> overallDiversity;
     private String[] axis = List.of("max_fit","avg_git","min_fit").toArray(new String[3]);
     XYChart chart;
+    XYChart diversityChart;
     SwingWrapper<XYChart> sw ;
+    List<XYChart> charts = new LinkedList<>();
     private boolean graph;
 
     public GeneticEngine(ConfigParser cp, InputFileParser ifp, boolean graph) throws IOException {
@@ -60,6 +62,7 @@ public class GeneticEngine {
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
+        this.diversityMap = new HashMap<>();
         this.graph = graph;
         SRandom.ifp = ifp;
         if(cp.getSeed() != 0){
@@ -73,20 +76,39 @@ public class GeneticEngine {
         avgFit = new ArrayList<>(100);
         minFit = new ArrayList<>(100);
 
+        overallDiversity = new ArrayList<>(100);
+
         Warrior.setCoefficients(cp.getAttackCoefficient(), cp.getDefenseCoefficient());
         generations.add(0,Double.valueOf(0));
         maxFit.add(0,Double.valueOf(0));
         avgFit.add(0,Double.valueOf(0));
         minFit.add(0, Double.valueOf(0));
+        overallDiversity.add(0, Double.valueOf(1));
 
         // Create Chart
         chart = QuickChart.getChart("Fitness Evolution",
                 "Generation", "Fitness","max_fit" , generations, maxFit);
         chart.addSeries("avg_fit", generations, avgFit);
         chart.addSeries("min_fit", generations, minFit);
+
+        for(Gene n: Gene.values()){
+            diversityMap.put(n, new ArrayList<>(100));
+            diversityMap.get(n).add(Double.valueOf(1));
+        }
+        diversityChart = QuickChart.getChart("Diversity Evolution",
+                "Generation", "Diveristy (%)", "OverallDiversity",
+                generations, overallDiversity);
+       /* for(Gene n: Gene.values()){
+            diversityChart.addSeries(n.toString(), generations, diversityMap.get(n));
+        }
+        */
+
         if(graph) {
-            sw = new SwingWrapper<XYChart>(chart);
-            sw.displayChart();
+            charts.add(chart);
+            charts.add(diversityChart);
+            sw = new SwingWrapper<XYChart>(charts);
+            sw.displayChartMatrix();
+
         }
 
 
@@ -94,6 +116,8 @@ public class GeneticEngine {
 
     public Warrior run(){
         initialPopulation();
+        overallDiversity.remove(generation);
+        overallDiversity.add(generation, Diversity.getDiversityPercentage(population));
 
         while(!hasFinished()){
             children.clear();
@@ -152,6 +176,11 @@ public class GeneticEngine {
         maxFit.add(generation, d.getMax());
         avgFit.add(generation, d.getAverage());
         minFit.add(generation, d.getMin());
+        Map<Gene, Double> aux = Diversity.getGeneDiversityPercentage(population);
+        for(Gene n: Gene.values()){
+            diversityMap.get(n).add(generation,aux.get(n));
+        }
+        overallDiversity.add(generation, Diversity.getDiversityPercentage(population));
 
         if(graph) updateGraph();
     }
@@ -160,11 +189,37 @@ public class GeneticEngine {
         chart.updateXYSeries("max_fit", generations, maxFit, null);
         chart.updateXYSeries("avg_fit", generations, avgFit, null);
         chart.updateXYSeries("min_fit", generations, minFit, null);
+        diversityChart.updateXYSeries("OverallDiversity", generations, overallDiversity, null);
+        /*for(Gene n: Gene.values()){
+            diversityChart.updateXYSeries(n.toString(), generations, diversityMap.get(n), null);
+        }
 
-        sw.repaintChart();
+         */
+        sw.repaintChart(0);
+        sw.repaintChart(1);
     }
 
     public List<DoubleSummaryStatistics> getSummary() {
         return summary;
+    }
+
+    public List<Double> getOverallDiversity() {
+        return overallDiversity;
+    }
+
+    public List<Double> getMaxFit() {
+        return maxFit;
+    }
+
+    public List<Double> getAvgFit() {
+        return avgFit;
+    }
+
+    public List<Double> getMinFit() {
+        return minFit;
+    }
+
+    public Map<Gene, List<Double>> getDiversityMap() {
+        return diversityMap;
     }
 }

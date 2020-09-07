@@ -15,10 +15,6 @@ public enum CrossoverParentSelection {
                 couples.add(Map.entry(parents.get(i), parents.get(i+1)));
             }
 
-            if(parents.size() %2 == 1){
-                // K is 2t +1, we need one more couple
-                couples.add(Map.entry(parents.get(parents.size()-1), parents.get(0)));
-            }
             return couples;
         }
     },ELITE{
@@ -31,10 +27,6 @@ public enum CrossoverParentSelection {
                 couples.add(Map.entry(parents.get(i), parents.get(i+1)));
             }
 
-            if(parents.size() %2 == 1){
-                // K is 2t +1, we need one more couple
-                couples.add(Map.entry(parents.get(parents.size()-1), parents.get(parents.size()-2)));
-            }
             return couples;
         }
     },DIVERSITY{
@@ -48,10 +40,6 @@ public enum CrossoverParentSelection {
                 couples.add(Map.entry(parents.get(i), parents.get(size - 1- i)));
             }
 
-            if(parents.size() %2 == 1){
-                // K is 2t +1, we need one more couple
-                couples.add(Map.entry(parents.get(medium), parents.get(medium + 1)));
-            }
             return couples;
         }
     };

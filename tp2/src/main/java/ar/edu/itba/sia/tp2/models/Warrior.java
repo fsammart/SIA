@@ -90,11 +90,11 @@ public class Warrior implements Comparable<Warrior> {
     }
 
     public Double getAttackHeightModifier() {
-        return 0.5 - Math.pow((3 * height - 5) , 4) + Math.pow((3 * height - 5) , 2) + height/2;
+        return 0.7 - Math.pow((3 * height - 5) , 4) + Math.pow((3 * height - 5) , 2) + height/4;
     }
 
     public Double getDefenseHeightModifier() {
-        return 2 + Math.pow((3 * height - 5) , 4) - Math.pow((3 * height - 5) , 2) - height/2;
+        return 1.9 + Math.pow((2.5 * height - 4.16) , 4) - Math.pow((2.5 * height - 4.16) , 2) - 3*height/10;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class Warrior implements Comparable<Warrior> {
         if (this == o) return true;
         if(o == null) return false;
 
-        return Math.abs(o.height - height) <= 0.001 &&
+        return Math.abs(o.height - height) <  0.0001 &&
                 Double.compare(o.fitness, this.fitness) == 0 &&
                 Objects.equals(weapon, o.weapon) &&
                 Objects.equals(boots, o.boots) &&
@@ -197,5 +197,9 @@ public class Warrior implements Comparable<Warrior> {
 
     public static void setBestWarrior(Warrior bestWarrior) {
         Warrior.bestWarrior = bestWarrior;
+    }
+
+    public double getHeight() {
+        return height;
     }
 }

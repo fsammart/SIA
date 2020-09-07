@@ -28,7 +28,7 @@ public class Main {
         ps = new PrintStream(fos);
         syso = System.out;
         System.setOut(ps);
-        System.out.println("Generation BestFit AvgFit WorstFit");
+        System.out.println("Generation BestFit AvgFit WorstFit Diversity");
         System.setOut(syso);
 
         ConfigParser cp = new ConfigParser();
@@ -39,19 +39,20 @@ public class Main {
         GeneticEngine ge = new GeneticEngine(cp, ifp, true);
 
         Warrior best = ge.run();
-        printStatistics(ge.getSummary());
+        printStatistics(ge.getSummary(), ge.getOverallDiversity());
         System.out.println("BEST CHARACTER");
         System.out.println(best);
 
     }
 
-    private static void printStatistics(List<DoubleSummaryStatistics> l){
+    private static void printStatistics(List<DoubleSummaryStatistics> l, List<Double> overallDiveristy){
         System.setOut(ps);
         Integer i = 0;
         for(DoubleSummaryStatistics d: l){
             System.out.println(
-                    String.format("%d %.4f %.4f %.4f", i++, d.getMax(),d.getAverage(),d.getMin())
+                    String.format("%d %.4f %.4f %.4f %.4f", i, d.getMax(),d.getAverage(),d.getMin(), overallDiveristy.get(i))
             );
+            i++;
         }
         System.setOut(syso);
     }
