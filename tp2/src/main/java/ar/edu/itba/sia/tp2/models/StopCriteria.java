@@ -7,6 +7,7 @@ import java.util.List;
 
 public enum StopCriteria {
 
+
     TIME{
         @Override
         public boolean hasFinished(List<Warrior> prevGeneration, List<Warrior> currentGeneration,
@@ -79,15 +80,19 @@ public enum StopCriteria {
         @Override
         public boolean hasFinished(List<Warrior> prevGeneration, List<Warrior> currentGeneration,
                                    int generationNumber) {
-        return STRUCTURE.hasFinished(prevGeneration, currentGeneration, generationNumber)
+        boolean a = STRUCTURE.hasFinished(prevGeneration, currentGeneration, generationNumber)
                 && CONTENT.hasFinished(prevGeneration, currentGeneration, generationNumber);
+
+        return a;
         }
     };
 
     public abstract boolean hasFinished(List<Warrior> prevGenetation, List<Warrior> currentGeneration,
                                         int generationNumber);
+
     public static ConfigParser cp;
     private static Integer repeatedGenerationsContent = 0;
     private static Integer repeatedGenerationsStructure = 0;
     private static long initialTime = -1;
+
 }

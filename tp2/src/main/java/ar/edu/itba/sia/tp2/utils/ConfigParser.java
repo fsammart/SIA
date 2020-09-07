@@ -40,6 +40,8 @@ public class ConfigParser {
     private SelectionMethod replacementMethod2;
     private Float replacementMethod1Percentage;
 
+    private Double diversityValue;
+
     private Double attackCoefficient;
     private Double defenseCoefficient;
 
@@ -107,6 +109,8 @@ public class ConfigParser {
             replacementMethod1 = SelectionMethod.valueOf(p.getProperty("REPLACEMENT_METHOD_1"));
             replacementMethod2 = SelectionMethod.valueOf(p.getProperty("REPLACEMENT_METHOD_2"));
             replacementMethod1Percentage = Float.parseFloat(p.getProperty("REPLACEMENT_METHOD_1_PERCENTAGE"));
+
+            diversityValue = Double.parseDouble(p.getProperty("DIVERSITY_VALUE", "0.5"));
 
             poolSize = Integer.parseInt(p.getProperty("POOL_SIZE"));
 
@@ -340,5 +344,13 @@ public class ConfigParser {
 
     public String getInputFilePath() {
         return inputFilePath;
+    }
+
+    public Double getDiversityValue() {
+        return diversityValue;
+    }
+
+    public void setDiversityValue(Double diversityValue) {
+        this.diversityValue = diversityValue;
     }
 }

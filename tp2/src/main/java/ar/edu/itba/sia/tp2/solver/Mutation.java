@@ -21,6 +21,6 @@ public class Mutation {
     }
 
     private static double mutationHeatProbability(double probability, int generation){
-        return probability * Math.exp((-0.005) * generation);
+        return probability * Math.exp((-0.0025) * generation);
     }
 }

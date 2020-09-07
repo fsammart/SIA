@@ -56,7 +56,7 @@ public enum SelectionMethod {
     public abstract List<Warrior> select(List<Warrior> l, int size, int combat_size, int generation);
 
     private static List<Warrior> boltzmannRoulette(List<Warrior> Warriors, int k, int generations) {
-        double temperature = 10 + (1000 - 10) * Math.exp((-0.005) * generations);
+        double temperature = 0.5 + (1000 - 0.5) * Math.exp((-0.005) * generations);
         double avgValue = averageBoltzmannExpression(Warriors, temperature);
         double randomNumbers[] = SRandom.r.doubles(k).toArray();
         Double fitness[] = Warriors.stream().map(c -> Math.exp(c.getFitness() / temperature) / avgValue)

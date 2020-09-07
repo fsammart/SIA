@@ -1,9 +1,7 @@
 package ar.edu.itba.sia.tp2;
 
-import ar.edu.itba.sia.tp2.models.CrossoverParentSelection;
-import ar.edu.itba.sia.tp2.models.Gene;
-import ar.edu.itba.sia.tp2.models.SelectionMethod;
-import ar.edu.itba.sia.tp2.models.Warrior;
+import ar.edu.itba.sia.tp2.models.*;
+import ar.edu.itba.sia.tp2.solver.Crossover;
 import ar.edu.itba.sia.tp2.solver.GeneticEngine;
 import ar.edu.itba.sia.tp2.utils.ConfigParser;
 import ar.edu.itba.sia.tp2.utils.InputFileParser;
@@ -42,22 +40,31 @@ public class Analysis {
         cp.getPropValues();
 
         InputFileParser ifp = new InputFileParser(cp.getInputFilePath());
-
-        for(SelectionMethod s : SelectionMethod.values()){
-            for(int i = 0; i < 3; i ++) {
-                cp.setSelectionMethod2(s);
-                GeneticEngine ge = new GeneticEngine(cp, ifp, false);
-                ge.run();
-                printStatistics(ge.getSummary(), cp, ge.getOverallDiversity(), ge.getDiversityMap());
+        long time = System.currentTimeMillis();
+        for(MutationType ct: MutationType.values()) {
+            cp.setMutationType(ct);
+            for (double s = 0; s <= 1; s += 0.025) {
+                for (int i = 0; i < 3; i++) {
+                    cp.setMutationProbability(s);
+                    cp.setSeed(time + i);
+                    GeneticEngine ge = new GeneticEngine(cp, ifp, false);
+                    ge.run();
+                    printStatistics(ge.getSummary(), cp, ge.getOverallDiversity(), ge.getDiversityMap(), 100);
+                }
             }
         }
 
     }
 
     private static void printStatistics(List<DoubleSummaryStatistics> l, ConfigParser cp,
-                                        List<Double> overallDiveristy, Map<Gene,List<Double>> diversityMap){
+                                        List<Double> overallDiveristy, Map<Gene,List<Double>> diversityMap, Integer last){
         System.setOut(ps);
         Integer i = 0;
+        int size = l.size();
+        if(last != null){
+            l = l.subList(size-last,size);
+            i = size-last;
+        }
         for(DoubleSummaryStatistics d: l){
             System.out.println(
                     String.format("%d %s %s %.3f %d %s %s %.3f" +

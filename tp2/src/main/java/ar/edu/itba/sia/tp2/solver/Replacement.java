@@ -12,9 +12,10 @@ public class Replacement {
     public static List<Warrior> replace(List<Warrior> population, List<Warrior> children,
                                           int generation, ReplacementType rt,
                                           SelectionMethod rm1, SelectionMethod rm2, double percentage,
-                                          int sizeCombat) {
+                                          int sizeCombat, double diversityValue) {
 
-        List<Warrior> l =  rt.nextGeneration(population,children,rm1,rm2,sizeCombat, percentage, generation);
+        List<Warrior> l =  rt.nextGeneration(population,children,rm1,rm2,sizeCombat, percentage,
+                                generation, diversityValue);
         l.stream().forEach(w ->{
             if(Warrior.getBestWarrior() == null || w.getFitness()> Warrior.getBestWarrior().getFitness()){
                 Warrior.setBestWarrior(w);

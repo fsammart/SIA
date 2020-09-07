@@ -102,6 +102,8 @@ public class GeneticEngine {
             diversityChart.addSeries(n.toString(), generations, diversityMap.get(n));
         }
         */
+        diversityChart.getStyler().setYAxisLogarithmic(true);
+        diversityChart.getStyler().setYAxisTicksVisible(true);
 
         if(graph) {
             charts.add(chart);
@@ -142,7 +144,7 @@ public class GeneticEngine {
 
             this.population = Replacement.replace(this.population,children,generation, cp.getReplacementType(),
                     cp.getReplacementMethod1(), cp.getSelectionMethod2(), cp.getReplacementMethod1Percentage(),
-                    cp.getTournamentCombatants());
+                    cp.getTournamentCombatants(), cp.getDiversityValue());
 
 
             generation++;

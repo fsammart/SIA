@@ -24,7 +24,7 @@ public enum MutationType {
                 int m = SRandom.r.nextInt(Warrior.getGeneNumber());
                 List<Gene> toMutate = genes.subList(0,m);
                 toMutate.forEach(g -> {
-                    ONE_GENE.mutate(r, generation, probability);
+                        mutateGene(r,g);
                 });
             }
         }
@@ -32,7 +32,9 @@ public enum MutationType {
         @Override
         public void mutate(Warrior r, int generation, double probability) {
             Arrays.stream(Gene.values()).forEach(g ->{
-                ONE_GENE.mutate(r,generation, probability);
+                if(SRandom.r.nextDouble() < probability) {
+                    mutateGene(r,g);
+                }
             });
         }
     }, COMPLETE{
@@ -40,7 +42,7 @@ public enum MutationType {
         public void mutate(Warrior r, int generation, double probability) {
             if(SRandom.r.nextDouble() < probability) {
                 Arrays.stream(Gene.values()).forEach(g -> {
-                    ONE_GENE.mutate(r, generation, 1);
+                        mutateGene(r,g);
                 });
             }
         }
