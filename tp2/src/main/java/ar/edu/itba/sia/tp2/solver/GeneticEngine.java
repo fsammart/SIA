@@ -2,6 +2,7 @@ package ar.edu.itba.sia.tp2.solver;
 
 import ar.edu.itba.sia.tp2.models.Gene;
 import ar.edu.itba.sia.tp2.models.StopCriteria;
+import ar.edu.itba.sia.tp2.models.Token;
 import ar.edu.itba.sia.tp2.models.Warrior;
 import ar.edu.itba.sia.tp2.utils.ConfigParser;
 import ar.edu.itba.sia.tp2.utils.Diversity;
@@ -9,8 +10,6 @@ import ar.edu.itba.sia.tp2.utils.InputFileParser;
 import ar.edu.itba.sia.tp2.utils.SRandom;
 import javafx.scene.layout.StackPane;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -20,12 +19,12 @@ import java.util.stream.IntStream;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import org.w3c.dom.DOMImplementation;
 
 
 public class GeneticEngine {
 
 
+    private double diversity;
 
     private List<Warrior> population;
     private List<Warrior> children;
@@ -59,6 +58,7 @@ public class GeneticEngine {
         this.summary = new ArrayList<>(2000);
         this.ifp = ifp;
         this.generation = 0;
+        this.diversity = 0;
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
@@ -111,7 +111,6 @@ public class GeneticEngine {
 
         }
 
-
     }
 
     public Warrior run(){
@@ -149,6 +148,7 @@ public class GeneticEngine {
             generation++;
 
             printStatistics();
+            printDiversityPercentage();
 
         }
 
