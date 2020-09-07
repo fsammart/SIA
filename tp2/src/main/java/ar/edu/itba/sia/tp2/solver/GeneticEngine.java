@@ -2,32 +2,29 @@ package ar.edu.itba.sia.tp2.solver;
 
 import ar.edu.itba.sia.tp2.models.Gene;
 import ar.edu.itba.sia.tp2.models.StopCriteria;
+import ar.edu.itba.sia.tp2.models.Token;
 import ar.edu.itba.sia.tp2.models.Warrior;
 import ar.edu.itba.sia.tp2.utils.ConfigParser;
 import ar.edu.itba.sia.tp2.utils.InputFileParser;
 import ar.edu.itba.sia.tp2.utils.SRandom;
 import javafx.scene.layout.StackPane;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import org.w3c.dom.DOMImplementation;
 
 
 public class GeneticEngine {
 
 
+    private double diversity;
 
     private List<Warrior> population;
     private List<Warrior> children;
@@ -46,9 +43,18 @@ public class GeneticEngine {
     private List<Double> maxFit;
     private List<Double> avgFit;
     private List<Double> minFit;
+
+    private List<Double> helmetDiversity;
+    private List<Double> weaponDiversity;
+    private List<Double> bootDiversity;
+    private List<Double> breastplateDiversity;
+    private List<Double> glovesDiversity;
+    private List<Double> heightDiversity;
+
     private String[] axis = List.of("max_fit","avg_git","min_fit").toArray(new String[3]);
     XYChart chart;
-    SwingWrapper<XYChart> sw ;
+    XYChart diversityChart;
+    SwingWrapper<XYChart> sw, swd;
     private boolean graph;
 
     public GeneticEngine(ConfigParser cp, InputFileParser ifp, boolean graph) throws IOException {
@@ -57,6 +63,7 @@ public class GeneticEngine {
         this.summary = new ArrayList<>(2000);
         this.ifp = ifp;
         this.generation = 0;
+        this.diversity = 0;
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
@@ -84,11 +91,36 @@ public class GeneticEngine {
                 "Generation", "Fitness","max_fit" , generations, maxFit);
         chart.addSeries("avg_fit", generations, avgFit);
         chart.addSeries("min_fit", generations, minFit);
+
+
+        helmetDiversity = new ArrayList<>(100);
+        weaponDiversity = new ArrayList<>(100);
+        bootDiversity = new ArrayList<>(100);
+        breastplateDiversity = new ArrayList<>(100);
+        glovesDiversity = new ArrayList<>(100);
+        heightDiversity = new ArrayList<>(100);
+
+        helmetDiversity.add(0,Double.valueOf(100));
+        weaponDiversity.add(0,Double.valueOf(100));
+        bootDiversity.add(0, Double.valueOf(100));
+        breastplateDiversity.add(0, Double.valueOf(100));
+        glovesDiversity.add(0, Double.valueOf(100));
+        heightDiversity.add(0, Double.valueOf(100));
+
+        diversityChart = QuickChart.getChart("Diversity Evolution",
+                "Generation", "Percentage","HELMET" , generations, helmetDiversity);
+        diversityChart.addSeries("WEAPON", generations, weaponDiversity);
+        diversityChart.addSeries("BOOTS", generations, bootDiversity);
+        diversityChart.addSeries("BREASTPLATE", generations, breastplateDiversity);
+        diversityChart.addSeries("GLOVES", generations, glovesDiversity, null);
+        diversityChart.addSeries("HEIGHT", generations, heightDiversity);
         if(graph) {
             sw = new SwingWrapper<XYChart>(chart);
             sw.displayChart();
-        }
 
+            swd = new SwingWrapper<XYChart>(diversityChart);
+            swd.displayChart();
+        }
 
     }
 
@@ -125,6 +157,7 @@ public class GeneticEngine {
             generation++;
 
             printStatistics();
+            printDiversityPercentage();
 
         }
 
@@ -166,5 +199,46 @@ public class GeneticEngine {
 
     public List<DoubleSummaryStatistics> getSummary() {
         return summary;
+    }
+
+    public void printDiversityPercentage() {
+        AtomicReference<Double> percentage = new AtomicReference<>();
+        Arrays.stream(Gene.values()).forEach(g ->{
+            Set<Token> alleles = new HashSet<Token>();
+            AtomicLong allelesRepetitions = new AtomicLong();
+            AtomicLong totalAlleles = new AtomicLong();
+            this.population.forEach(w -> {
+                totalAlleles.getAndIncrement();
+                Token allele = w.getToken(g);
+                if (g == Gene.HEIGHT) {
+
+                } else if (alleles.contains(allele)) {
+                    allelesRepetitions.getAndIncrement();
+                } else {
+                    alleles.add(allele);
+                }
+            });
+            percentage.set((1 - (double)allelesRepetitions.get() / (double)totalAlleles.get()) * 100);
+            switch(g) {
+                case WEAPON: weaponDiversity.add(generation, percentage.get()); break;
+                case BOOTS: bootDiversity.add(generation, percentage.get()); break;
+                case HELMET: helmetDiversity.add(generation, percentage.get()); break;
+                case GLOVES: glovesDiversity.add(generation, percentage.get()); break;
+                case BREASTPLATE: breastplateDiversity.add(generation, percentage.get()); break;
+                case HEIGHT: heightDiversity.add(generation, percentage.get()); break;
+            }
+
+        });
+
+        if(graph) {
+            diversityChart.updateXYSeries("HELMET", generations, helmetDiversity, null);
+            diversityChart.updateXYSeries("WEAPON", generations, weaponDiversity, null);
+            diversityChart.updateXYSeries("BOOTS", generations, bootDiversity, null);
+            diversityChart.updateXYSeries("BREASTPLATE", generations, breastplateDiversity, null);
+            diversityChart.updateXYSeries("GLOVES", generations, glovesDiversity, null);
+            diversityChart.updateXYSeries("HEIGHT", generations, heightDiversity, null);
+
+            swd.repaintChart();
+        }
     }
 }
