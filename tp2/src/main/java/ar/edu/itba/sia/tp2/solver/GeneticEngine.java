@@ -240,5 +240,7 @@ public class GeneticEngine {
 
             swd.repaintChart();
         }
+
+
     }
 }

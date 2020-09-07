@@ -42,7 +42,7 @@ public enum ReplacementType {
                 return children;
             }
         }
-    }, FILL_RANDOM{
+    }, FILL_ALL_RANDOM{
         @Override
         public List<Warrior> nextGeneration(List<Warrior> prevGeneration,
                                             List<Warrior> children, SelectionMethod rm1,
