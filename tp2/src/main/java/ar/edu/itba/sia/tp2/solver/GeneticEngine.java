@@ -44,6 +44,7 @@ public class GeneticEngine {
     private List<Double> avgFit;
     private List<Double> minFit;
 
+    private List<Double> populationDiversity;
     private List<Double> helmetDiversity;
     private List<Double> weaponDiversity;
     private List<Double> bootDiversity;
@@ -92,7 +93,7 @@ public class GeneticEngine {
         chart.addSeries("avg_fit", generations, avgFit);
         chart.addSeries("min_fit", generations, minFit);
 
-
+        populationDiversity = new ArrayList<>(100);
         helmetDiversity = new ArrayList<>(100);
         weaponDiversity = new ArrayList<>(100);
         bootDiversity = new ArrayList<>(100);
@@ -100,20 +101,22 @@ public class GeneticEngine {
         glovesDiversity = new ArrayList<>(100);
         heightDiversity = new ArrayList<>(100);
 
-        helmetDiversity.add(0,Double.valueOf(100));
-        weaponDiversity.add(0,Double.valueOf(100));
-        bootDiversity.add(0, Double.valueOf(100));
-        breastplateDiversity.add(0, Double.valueOf(100));
-        glovesDiversity.add(0, Double.valueOf(100));
-        heightDiversity.add(0, Double.valueOf(100));
+        populationDiversity.add(0,Double.valueOf(100));
+//        helmetDiversity.add(0,Double.valueOf(100));
+//        weaponDiversity.add(0,Double.valueOf(100));
+//        bootDiversity.add(0, Double.valueOf(100));
+//        breastplateDiversity.add(0, Double.valueOf(100));
+//        glovesDiversity.add(0, Double.valueOf(100));
+//        heightDiversity.add(0, Double.valueOf(100));
 
         diversityChart = QuickChart.getChart("Diversity Evolution",
-                "Generation", "Percentage","HELMET" , generations, helmetDiversity);
-        diversityChart.addSeries("WEAPON", generations, weaponDiversity);
-        diversityChart.addSeries("BOOTS", generations, bootDiversity);
-        diversityChart.addSeries("BREASTPLATE", generations, breastplateDiversity);
-        diversityChart.addSeries("GLOVES", generations, glovesDiversity, null);
-        diversityChart.addSeries("HEIGHT", generations, heightDiversity);
+                "Generation", "Percentage","POPULATION" , generations, populationDiversity);
+//        diversityChart.addSeries("HELMET", generations, helmetDiversity)
+//        diversityChart.addSeries("WEAPON", generations, weaponDiversity);
+//        diversityChart.addSeries("BOOTS", generations, bootDiversity);
+//        diversityChart.addSeries("BREASTPLATE", generations, breastplateDiversity);
+//        diversityChart.addSeries("GLOVES", generations, glovesDiversity, null);
+//        diversityChart.addSeries("HEIGHT", generations, heightDiversity);
         if(graph) {
             sw = new SwingWrapper<XYChart>(chart);
             sw.displayChart();
@@ -202,11 +205,20 @@ public class GeneticEngine {
     }
 
     public void printDiversityPercentage() {
+
+//        if (helmetDiversity.get(generation - 1) < 10
+//                && weaponDiversity.get(generation - 1) < 10
+//                && bootDiversity.get(generation - 1) < 10
+//                && breastplateDiversity.get(generation - 1) < 10
+//                && glovesDiversity.get(generation - 1) < 10) {
+//            return;
+//        }
+
+        AtomicLong allelesRepetitions = new AtomicLong();
+        AtomicLong totalAlleles = new AtomicLong();
         AtomicReference<Double> percentage = new AtomicReference<>();
         Arrays.stream(Gene.values()).forEach(g ->{
             Set<Token> alleles = new HashSet<Token>();
-            AtomicLong allelesRepetitions = new AtomicLong();
-            AtomicLong totalAlleles = new AtomicLong();
             this.population.forEach(w -> {
                 totalAlleles.getAndIncrement();
                 Token allele = w.getToken(g);
@@ -218,25 +230,32 @@ public class GeneticEngine {
                     alleles.add(allele);
                 }
             });
-            percentage.set((1 - (double)allelesRepetitions.get() / (double)totalAlleles.get()) * 100);
-            switch(g) {
-                case WEAPON: weaponDiversity.add(generation, percentage.get()); break;
-                case BOOTS: bootDiversity.add(generation, percentage.get()); break;
-                case HELMET: helmetDiversity.add(generation, percentage.get()); break;
-                case GLOVES: glovesDiversity.add(generation, percentage.get()); break;
-                case BREASTPLATE: breastplateDiversity.add(generation, percentage.get()); break;
-                case HEIGHT: heightDiversity.add(generation, percentage.get()); break;
-            }
+//            percentage.set((1 - (double)allelesRepetitions.get() / (double)totalAlleles.get()) * 100);
+//            switch(g) {
+//                case WEAPON: weaponDiversity.add(generation, percentage.get()); break;
+//                case BOOTS: bootDiversity.add(generation, percentage.get()); break;
+//                case HELMET: helmetDiversity.add(generation, percentage.get()); break;
+//                case GLOVES: glovesDiversity.add(generation, percentage.get()); break;
+//                case BREASTPLATE: breastplateDiversity.add(generation, percentage.get()); break;
+//                case HEIGHT: heightDiversity.add(generation, percentage.get()); break;
+//            }
 
         });
+        if (generation == 1) {
+            populationDiversity.remove(0);
+            populationDiversity.add(0, (1 - (double)allelesRepetitions.get() / (double)totalAlleles.get()) * 100);
+        }
+        populationDiversity.add(generation, (1 - (double)allelesRepetitions.get() / (double)totalAlleles.get()) * 100);
 
         if(graph) {
-            diversityChart.updateXYSeries("HELMET", generations, helmetDiversity, null);
-            diversityChart.updateXYSeries("WEAPON", generations, weaponDiversity, null);
-            diversityChart.updateXYSeries("BOOTS", generations, bootDiversity, null);
-            diversityChart.updateXYSeries("BREASTPLATE", generations, breastplateDiversity, null);
-            diversityChart.updateXYSeries("GLOVES", generations, glovesDiversity, null);
-            diversityChart.updateXYSeries("HEIGHT", generations, heightDiversity, null);
+            diversityChart.updateXYSeries("POPULATION", generations, populationDiversity, null);
+
+//            diversityChart.updateXYSeries("HELMET", generations, helmetDiversity, null);
+//            diversityChart.updateXYSeries("WEAPON", generations, weaponDiversity, null);
+//            diversityChart.updateXYSeries("BOOTS", generations, bootDiversity, null);
+//            diversityChart.updateXYSeries("BREASTPLATE", generations, breastplateDiversity, null);
+//            diversityChart.updateXYSeries("GLOVES", generations, glovesDiversity, null);
+//            diversityChart.updateXYSeries("HEIGHT", generations, heightDiversity, null);
 
             swd.repaintChart();
         }
