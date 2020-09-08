@@ -34,13 +34,18 @@ public enum ReplacementType {
                                             int generation, double diversityValue) {
             int n = prevGeneration.size();
             int k = children.size();
+            List<Warrior> total = new ArrayList<>(n);
+            if(prevGeneration.size()< 300){
+                int a = 34;
+            }
             if( n <= k){
                 return Selection.select(rm1, rm2, percentage,children,n, sizeCombat, generation);
             }else{
-                children.addAll(
+                total.addAll(children);
+                total.addAll(
                         Selection.select(rm1, rm2, percentage,prevGeneration,n - k, sizeCombat, generation)
                 );
-                return children;
+                return total;
             }
         }
     }, FILL_ALL_RANDOM{
@@ -95,7 +100,6 @@ public enum ReplacementType {
             total.addAll(children);
 
             List<Warrior> toReturn = Selection.select(rm1, rm2, percentage,total,n - randomToAdd, sizeCombat, generation);
-            System.out.println(randomToAdd);
             if(randomToAdd > 0) {
                 IntStream.range(0, randomToAdd).forEach(idx -> {
                     toReturn.add(SRandom.getRandomWarrior());
