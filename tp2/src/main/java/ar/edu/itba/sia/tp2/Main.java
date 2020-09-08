@@ -35,13 +35,20 @@ public class Main {
         cp.getPropValues();
 
         InputFileParser ifp = new InputFileParser(cp.getInputFilePath());
+        GeneticEngine ge = new GeneticEngine(cp, ifp, true, true);
+        Warrior best;
+        try {
+            best = ge.run();
+        }catch(Exception e){
 
-        GeneticEngine ge = new GeneticEngine(cp, ifp, true);
+            printStatistics(ge.getSummary(), ge.getOverallDiversity());
+            return ;
 
-        Warrior best = ge.run();
-        printStatistics(ge.getSummary(), ge.getOverallDiversity());
+        }
         System.out.println("BEST CHARACTER");
         System.out.println(best);
+
+
 
     }
 

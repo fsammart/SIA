@@ -41,16 +41,16 @@ public class Analysis {
 
         InputFileParser ifp = new InputFileParser(cp.getInputFilePath());
         long time = System.currentTimeMillis();
-        for(MutationType ct: MutationType.values()) {
-            cp.setMutationType(ct);
-            for (double s = 0; s <= 1; s += 0.025) {
-                for (int i = 0; i < 3; i++) {
-                    cp.setMutationProbability(s);
-                    cp.setSeed(time + i);
-                    GeneticEngine ge = new GeneticEngine(cp, ifp, false);
-                    ge.run();
-                    printStatistics(ge.getSummary(), cp, ge.getOverallDiversity(), ge.getDiversityMap(), 100);
-                }
+        cp.setMutationType(MutationType.UNIFORM);
+        cp.setMutationHeat(true);
+        List<StopCriteria> sList = List.of(StopCriteria.CONTENT, StopCriteria.STRUCTURE, StopCriteria.COMBINED);
+        for(StopCriteria sc: sList) {
+            cp.setStopCriteria(sc);
+            for (int i = 0; i < 3; i++) {
+                cp.setSeed(time + i);
+                GeneticEngine ge = new GeneticEngine(cp, ifp, false, false);
+                ge.run();
+                printStatistics(ge.getSummary(), cp, ge.getOverallDiversity(), ge.getDiversityMap(), null);
             }
         }
 

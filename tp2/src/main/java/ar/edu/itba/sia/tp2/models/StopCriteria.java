@@ -39,8 +39,11 @@ public enum StopCriteria {
         @Override
         public boolean hasFinished(List<Warrior> prevGeneration, List<Warrior> currentGeneration,
                                    int generationNumber) {
-            if(generationNumber == 0)
+            if(generationNumber == 0) {
+                repeatedGenerationsContent = 0;
+                repeatedGenerationsStructure= 0;
                 return false;
+            }
             double prevMaxRating = Collections.max(prevGeneration).getFitness();
             double maxRating = Collections.max(currentGeneration).getFitness();
 
@@ -56,8 +59,11 @@ public enum StopCriteria {
         @Override
         public boolean hasFinished(List<Warrior> prevGeneration, List<Warrior> currentGeneration,
                                    int generationNumber) {
-            if (generationNumber == 0)
+            if(generationNumber == 0) {
+                repeatedGenerationsStructure= 0;
+                repeatedGenerationsContent = 0;
                 return false;
+            }
             double repeatedCharacters = 0;
 
             for(Warrior w: currentGeneration){

@@ -51,14 +51,16 @@ public class GeneticEngine {
     SwingWrapper<XYChart> sw ;
     List<XYChart> charts = new LinkedList<>();
     private boolean graph;
+    private boolean printEvolution;
 
-    public GeneticEngine(ConfigParser cp, InputFileParser ifp, boolean graph) throws IOException {
+    public GeneticEngine(ConfigParser cp, InputFileParser ifp, boolean graph, boolean printEvolution) throws IOException {
         this.cp = cp;
         StopCriteria.cp = cp;
         this.summary = new ArrayList<>(2000);
         this.ifp = ifp;
         this.generation = 0;
         this.diversity = 0;
+        this.printEvolution = printEvolution;
         this.children = new ArrayList<>(cp.getPoolSize() + 2);
         this.selection = new ArrayList<>(cp.getPoolSize() + 2);
         this.prevGeneration = new ArrayList<>(cp.getPoolSize() + 2);
@@ -169,7 +171,6 @@ public class GeneticEngine {
     }
 
     private void printStatistics(){
-        System.setOut(ps);
 
         DoubleSummaryStatistics d = population.stream().mapToDouble(Warrior::getFitness).summaryStatistics();
         summary.add(d);
@@ -184,6 +185,15 @@ public class GeneticEngine {
         overallDiversity.add(generation, Diversity.getDiversityPercentage(population));
 
         if(graph) updateGraph();
+        if(printEvolution) {
+
+            System.out.println( "generation: " + generation + "\n" +
+                    Warrior.getBestWarrior()
+            );
+
+        }
+
+
     }
 
     private  void updateGraph(){
