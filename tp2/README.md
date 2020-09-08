@@ -17,7 +17,7 @@ The following command will execute the solver with the specified arguments in so
 cd /tp2
 mvn exec:java -Dexec.mainClass=ar.edu.itba.sia.tp2.Main 
 ``
-
+This will produce live plots of fitness and diversity.
 ## Results
 
 Generation Evolution  will be saved under the directory `/results`.
