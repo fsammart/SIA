@@ -29,7 +29,7 @@ public class Main {
         syso = System.out;
         System.setOut(ps);
         System.out.println("Generation BestFit AvgFit WorstFit Diversity");
-        System.setOut(syso);
+        
 
         ConfigParser cp = new ConfigParser();
         cp.getPropValues();
