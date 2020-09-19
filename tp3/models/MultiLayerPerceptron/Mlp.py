@@ -3,7 +3,9 @@ from ActivationFunctions.Functions import Function as f
 
 
 class Mlp():
-    def __init__(self, size_layers, g=f.sigmoid, g_prima=f.sigmoid_derivative, momentum=0, eta=0.01):
+    def __init__(self, size_layers, g=f.sigmoid, g_prima=f.sigmoid_derivative,
+                 momentum=0, eta=0.01, eta_adaptative=True, iter_update_eta=5,
+                 eta_increment=0.01, eta_decrement=0.1, precision=0.01, min_eta=0.01):
         '''
         Constructor method. Defines MLP characteristics
         Arguments:
@@ -18,6 +20,12 @@ class Mlp():
         self.eta = eta
         self.g = g
         self.g_prima = g_prima
+        self.eta_adaptative = eta_adaptative
+        self.iter_update_eta = iter_update_eta
+        self.eta_increment = eta_increment
+        self.eta_decrement = eta_decrement
+        self.precision = precision
+        self.min_eta=min_eta
 
         # Ramdomly initialize theta (MLP weights)
         self.initialize_theta_weights()
@@ -32,12 +40,19 @@ class Mlp():
                 default = False
         '''
         n_examples = Y.shape[0]
+        self.last_error = 0
+        self.increasing_errors = 0
+        self.decreasing_errors = 0
+
+        error = 1
 
         if reset:
             self.initialize_theta_weights()
         self.previous_gradients = None
         if batch:
             for iteration in range(iterations):
+                if error < self.precision:
+                    return
                 self.gradients, last_delta = self.backpropagation(X, Y)
                 if self.previous_gradients == None:
                     self.previous_gradients = self.gradients
@@ -46,9 +61,12 @@ class Mlp():
                                             + self.momentum*self.previous_gradients[i]
                     self.previous_gradients[i] = - self.eta *  self.gradients[i]
                 error = np.mean(np.power(last_delta, 2))
+                if self.eta_adaptative: self.adapt_eta(error)
                 print(error)
         else:
             for iteration in range(iterations):
+                if error < self.precision:
+                    return
                 errors = [None] * n_examples
                 for i in range(n_examples):
                     patron = X[i, :].reshape((1, X.shape[1]))
@@ -62,6 +80,30 @@ class Mlp():
                                                 + self.momentum*self.previous_gradients[i]
                         self.previous_gradients[i] = - self.eta * self.gradients[i]
                 error = np.mean(np.power(errors, 2))
+                if self.eta_adaptative: self.adapt_eta(error)
+
+    def adapt_eta(self, error):
+        if self.last_error == 0:
+            self.last_error = error
+        elif self.last_error < error:
+            #increasing
+            self.decreasing_errors = 0
+            self.increasing_errors +=1
+        elif self.last_error > error:
+            #decreasing
+            self.decreasing_errors += 1
+            self.increasing_errors = 0
+        if self.decreasing_errors >= self.iter_update_eta:
+            self.eta += self.eta_increment
+            self.decreasing_errors = 0
+        if self.increasing_errors >= self.iter_update_eta:
+            self.eta -= self.eta_decrement
+            if self.eta < self.min_eta:
+                self.eta = self.min_eta
+            self.increasing_errors = 0
+        self.last_error = error
+        print(self.eta)
+        return
 
     def predict(self, X):
         # Predict output value for X input.
