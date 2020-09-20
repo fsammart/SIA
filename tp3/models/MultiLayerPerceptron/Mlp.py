@@ -5,15 +5,9 @@ from ActivationFunctions.Functions import Function as f
 class Mlp():
     def __init__(self, size_layers, g=f.sigmoid, g_prima=f.sigmoid_derivative,
                  momentum=0, eta=0.01, eta_adaptative=True, iter_update_eta=5,
-                 eta_increment=0.01, eta_decrement=0.1, precision=0.01, min_eta=0.01):
-        '''
-        Constructor method. Defines MLP characteristics
-        Arguments:
-            size_layers : List with the number of Units for:
-                [Input, Hidden1, Hidden2, ... HiddenN, Output] Layers.
-            momemtum: momentum param. Default =0
-            eta: size of step
-        '''
+                 eta_increment=0.01, eta_decrement=0.1, precision=0.01, min_eta=0.01,
+                  input_range=[0,1], output_range=[-1,1], params=None):
+
         self.size_layers = size_layers
         self.n_layers = len(size_layers)
         self.momentum = momentum
@@ -26,6 +20,10 @@ class Mlp():
         self.eta_decrement = eta_decrement
         self.precision = precision
         self.min_eta=min_eta
+        self.output_range = output_range
+        self.input_range = input_range
+        self.range_transform = f.range_transform
+        self.params = params
 
         # Ramdomly initialize theta (MLP weights)
         self.initialize_theta_weights()
@@ -46,13 +44,17 @@ class Mlp():
 
         error = 1
 
+        # transform output range
+        t = lambda x: self.range_transform(self.output_range, x, self.input_range)
+        Y = t(Y)
+
         if reset:
             self.initialize_theta_weights()
         self.previous_gradients = None
         if batch:
             for iteration in range(iterations):
                 if error < self.precision:
-                    return
+                    break
                 self.gradients, last_delta = self.backpropagation(X, Y)
                 if self.previous_gradients == None:
                     self.previous_gradients = self.gradients
@@ -60,13 +62,13 @@ class Mlp():
                     self.theta_weights[i] = self.theta_weights[i] - self.eta * self.gradients[i] \
                                             + self.momentum*self.previous_gradients[i]
                     self.previous_gradients[i] = - self.eta *  self.gradients[i]
-                error = np.mean(np.power(last_delta, 2))
+                error = 0.5 * np.sum(np.power(last_delta, 2))
+                print(str(iteration) + "\t" + str(self.eta) + "\t" + str(error))
                 if self.eta_adaptative: self.adapt_eta(error)
-                print(error)
         else:
             for iteration in range(iterations):
                 if error < self.precision:
-                    return
+                    break
                 errors = [None] * n_examples
                 for i in range(n_examples):
                     patron = X[i, :].reshape((1, X.shape[1]))
@@ -79,9 +81,10 @@ class Mlp():
                         self.theta_weights[i] = self.theta_weights[i] - self.eta * self.gradients[i] \
                                                 + self.momentum*self.previous_gradients[i]
                         self.previous_gradients[i] = - self.eta * self.gradients[i]
-                error = np.mean(np.power(errors, 2))
+                error = 0.5 * np.sum(np.power(errors, 2))
                 if self.eta_adaptative: self.adapt_eta(error)
-
+        print(error)
+        print(iteration)
     def adapt_eta(self, error):
         if self.last_error == 0:
             self.last_error = error
@@ -97,26 +100,26 @@ class Mlp():
             self.eta += self.eta_increment
             self.decreasing_errors = 0
         if self.increasing_errors >= self.iter_update_eta:
-            self.eta -= self.eta_decrement
+            self.eta *= self.eta_decrement
             if self.eta < self.min_eta:
                 self.eta = self.min_eta
             self.increasing_errors = 0
         self.last_error = error
-        print(self.eta)
         return
 
     def predict(self, X):
         # Predict output value for X input.
+        t = lambda x: self.range_transform(self.input_range, x, self.output_range)
 
         A = self.feedforward(X)
         # output is last value
         output = A[-1]
-        return output
+        return t(output)
 
     def backpropagation(self, X, Y):
         # Implementation of the Backpropagation algorithm with regularization
 
-        g_dz = lambda x: self.g_prima(x)
+        g_dz = lambda x: self.g_prima(x, self.params)
 
         # Feedforward
         A = self.feedforward(X)
@@ -147,7 +150,7 @@ class Mlp():
     def feedforward(self, X):
         # Implementation of the Feedforward
 
-        g = lambda x: self.g(x)
+        g = lambda x: self.g(x, self.params)
 
         A = [None] * self.n_layers
         input_layer = X

@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 from ActivationFunctions import StepFunction, NonLinearFunction
 
 def simple_perceptron(eta, iterations):
-    ppn = p.SimplePerceptron(eta, iterations, NonLinearFunction, 0.1)
+    ppn = p.SimplePerceptron(eta, iterations, StepFunction, 0.1)
     X = np.array([[-1, 1], [1, -1], [-1, -1], [1, 1]])
-    y = np.array([1, 1, -1, -1])
+    y = np.array([1, 1, 1, -1])
 
     ppn.fit(X, y)
     plt.figure(1)
@@ -31,6 +31,6 @@ def simple_perceptron(eta, iterations):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    simple_perceptron(6, 1000)
+    simple_perceptron(1, 1000)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -4,16 +4,27 @@ import numpy as np
 class Function:
 
     @staticmethod
-    def sigmoid(z):
+    def sigmoid(z, beta):
         '''
         Sigmoid function
         z can be an numpy array or scalar
         '''
-        result = 1.0 / (1.0 + np.exp(-z))
+        result = 1.0 / (1.0 + np.exp(-z*beta))
         return result
 
     @staticmethod
-    def relu(z):
+    def range_transform(input_range, x, output_range):
+        old_range = max(input_range) - min(input_range)
+        new_range = max(output_range) - min(output_range)
+        if x.shape == ():
+            return (((x - min(input_range)) * new_range) / old_range) + min(output_range)
+        for i in range(x.shape[0]):
+            x[i] = (((x[i] - min(input_range)) * new_range) / old_range) + min(output_range)
+        return x
+
+
+    @staticmethod
+    def relu(z, params):
         '''
         Rectified Linear function
         z can be an numpy array or scalar
@@ -27,19 +38,27 @@ class Function:
         return result
 
     @staticmethod
-    def sigmoid_derivative(z):
+    def sigmoid_derivative(z, beta):
         '''
         Derivative for Sigmoid function
         z can be an numpy array or scalar
         '''
-        result = z * (1 - z)
+        result = beta* z * (1 - z)
         return result
 
     @staticmethod
-    def relu_derivative(z):
+    def relu_derivative(z, params):
         '''
         Derivative for Rectified Linear function
         z can be an numpy array or scalar
         '''
         result = 1 * (z > 0)
         return result
+
+    @staticmethod
+    def linear(z, beta):
+        return z
+
+    @staticmethod
+    def linear_derivative(z, beta):
+        return 1

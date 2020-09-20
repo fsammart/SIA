@@ -2,9 +2,7 @@ import numpy as np
 from ActivationFunctions import Function
 
 def predict(X, w_, beta):
-    """NonLinear.
-    tanh
-    """
+
     return net_input(X, w_, beta)
 
 
@@ -12,13 +10,13 @@ def net_input(X, w_, beta):
     """Calculate z"""
     # z = w · x + theta
     h = Function.net_input(X, w_)
-    z = g(h, beta)
-    return z
+    return h
 
 def g(z, beta):
-    return np.tanh(z*beta)
+    return z
 
 def g_prima(z, beta):
-    return beta * (1-z*z)
+    return 1
+
 def __str__():
-    return "phi(z) = tanh(z*beta)"
+    return "linear"

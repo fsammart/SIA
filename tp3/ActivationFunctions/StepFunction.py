@@ -9,6 +9,19 @@ def predict(X, w_, beta):
     phi = np.where(h >= 0.0, 1, -1)
     return phi
 
+def g(z, beta):
+    """Step function.
+    phi(z) = 1 si z >= theta; -1 en otro caso
+    """
+    return  np.where(z >= 0.0, 1, -1)
+
+
+def g_prima(z, beta):
+    """Step function.
+    phi(z) = 1 si z >= theta; -1 en otro caso
+    """
+    return  1
+
 def __str__():
     return "phi(z) = 1 if z>= 0 else 0"
 
