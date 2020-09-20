@@ -1,4 +1,4 @@
-import models.SimplePerceptron as p
+import models.MultiLayerPerceptron.Mlp as mlp
 import numpy as np
 import matplotlib.pyplot as plt
 from ActivationFunctions import NonLinearFunction
@@ -19,22 +19,27 @@ def multi_layer_perceptron(eta, iterations):
         for i in range(0, len(lines)):
             x1 = [float(x) for x in lines[i].split()]
             a.append([x1])
-    y = np.array(a)
+    y = np.reshape(a,(X.shape[0],1))
 
-    ppn = p.SimplePerceptron(eta, n_iter=iterations, g=NonLinearFunction, params=1)
-    max_y = max(y)[0][0]
+    net = mlp.Mlp([3, 1], momentum=0, eta=0.01, eta_adaptative=True, iter_update_eta=5,
+                  eta_increment=0.001, eta_decrement=0.5, precision=0.00033, min_eta=0.00001, params=1)
+    max_y = np.max(y)
     max_x = np.ceil(np.max(X))
     min_x = np.floor(np.min(X))
     t1 = lambda x: f_range.range_transform([min_x, max_x], x, [-1, 1])
     t = lambda x: f_range.range_transform([0,max_y], x, [-1,1])
     t2 = lambda x: f_range.range_transform([-1,1], x, [0,max_y])
+    y_copy = y.__copy__()
     y = t(y)
     R = X.__copy__()
     X = t1(X)
-    ppn.fit(X,y)
-    for i in range(X.shape[0]):
-        print(R[i])
-        print(t2(ppn.g.predict(X[i,:], ppn.w_,1)))
+    net.train(X, y, iterations=15000, reset=False, batch=True)
+    #print(R[i])
+    predictions = t2(net.predict(X))
+    i = 0
+    for elem in predictions:
+        print(str(i) + "\t" + str(float(elem)) + "\t" + str(float(y_copy[i])))
+        i +=1
 
 
 
