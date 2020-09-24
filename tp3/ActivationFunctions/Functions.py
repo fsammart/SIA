@@ -62,3 +62,11 @@ class Function:
     @staticmethod
     def linear_derivative(z, beta):
         return 1
+
+    @staticmethod
+    def tanh(z, beta):
+        return np.tanh(z * beta)
+
+    @staticmethod
+    def tanh_derivative(z, beta):
+        return beta * (1 - z * z)

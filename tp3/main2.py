@@ -20,17 +20,20 @@ def multi_layer_perceptron(eta, iterations):
             a.append([x1])
     y = np.array(a)
 
-    ppn = p.SimplePerceptron(eta, n_iter=iterations, g=LinearFunction, params=0.1)
+    ppn = p.SimplePerceptron(eta, n_iter=iterations, g=LinearFunction, params=1)
 
     ppn.fit(X,y)
-    print(X[1])
-    print(ppn.g.predict(X[1,:], ppn.w_,0))
+    print(ppn.W_)
+    predictions = ppn.g.predict(X, ppn.w_,0)
 
-
+    i = 0
+    for elem in predictions:
+        print(str(i) + "\t" + str(float(elem)) + "\t" + str(float(y[i])))
+        i += 1
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    multi_layer_perceptron(0.002, 1000)
+    multi_layer_perceptron(0.0001, 1000)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

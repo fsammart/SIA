@@ -13,7 +13,7 @@ def multi_layer_perceptron(eta, iterations):
     with open('TP3-ej3-mapa-de-pixeles-digitos-decimales.txt') as f:
         lines = f.readlines()
         for i in range(10):
-            aux = [-1] * 10
+            aux = [0] * 10
             aux[digit] = 1
             b[digit] = aux
             a[digit] = []
@@ -26,7 +26,7 @@ def multi_layer_perceptron(eta, iterations):
     y = np.reshape(b,(X.shape[0],10))
 
     net = mlp.Mlp([digit_map_height*digit_map_width,5,3,10], momentum=0.5, eta=0.01, eta_adaptative=True, iter_update_eta=5,
-                  eta_increment=0.01, eta_decrement=0.1, precision=0.0001, min_eta=0.00001, params=0.5)
+                  eta_increment=0.01, eta_decrement=0.1, precision=0.00001, min_eta=0.00001, params=0.5, output_range=[0,1])
 
 
     y

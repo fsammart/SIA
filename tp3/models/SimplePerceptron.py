@@ -36,14 +36,15 @@ class SimplePerceptron:
         self.last_error = 0
         self.decreasing_errors = 0
         self.increasing_errors = 0
-        self.eta_increment = 0.001
-        self.eta_decrement = 0.4
-        self.min_eta = 0.00001
-        self.iter_update_eta = 5
-        self.momentum = 0.8
+        self.eta_increment = 0.0005
+        self.eta_decrement = 0.5
+        self.min_eta = 0.00002
+        self.iter_update_eta = 2
+        self.momentum = 0.7
 
         self.deltas = [None] * (self.n_iter+1)
         self.deltas[0] = np.zeros(X.shape[1]  + 1)
+        # batch
         for _ in range(self.n_iter):
             errors = 0
             update = np.zeros(X.shape[1]  + 1)

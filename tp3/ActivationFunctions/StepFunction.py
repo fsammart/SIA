@@ -17,9 +17,7 @@ def g(z, beta):
 
 
 def g_prima(z, beta):
-    """Step function.
-    phi(z) = 1 si z >= theta; -1 en otro caso
-    """
+
     return  1
 
 def __str__():

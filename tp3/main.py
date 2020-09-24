@@ -6,7 +6,7 @@ from ActivationFunctions import StepFunction, NonLinearFunction
 def simple_perceptron(eta, iterations):
     ppn = p.SimplePerceptron(eta, iterations, StepFunction, 0.1)
     X = np.array([[-1, 1], [1, -1], [-1, -1], [1, 1]])
-    y = np.array([1, 1, 1, -1])
+    y = np.array([1, 1, 0, 0])
 
     ppn.fit(X, y)
     plt.figure(1)

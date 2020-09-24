@@ -6,7 +6,7 @@ class Mlp():
     def __init__(self, size_layers, g=f.sigmoid, g_prima=f.sigmoid_derivative,
                  momentum=0, eta=0.01, eta_adaptative=True, iter_update_eta=5,
                  eta_increment=0.01, eta_decrement=0.1, precision=0.01, min_eta=0.01,
-                  input_range=[0,1], output_range=[-1,1], params=None):
+                  input_range=[0,1], output_range=[-1,1], params=None, first_eta_automatic=False):
 
         self.size_layers = size_layers
         self.n_layers = len(size_layers)
@@ -24,11 +24,12 @@ class Mlp():
         self.input_range = input_range
         self.range_transform = f.range_transform
         self.params = params
+        self.first_eta_automatic = first_eta_automatic
 
         # Ramdomly initialize theta (MLP weights)
         self.initialize_theta_weights()
 
-    def train(self, X, Y, iterations=800, reset=False, batch=True):
+    def train(self, X, y, iterations=800, reset=False, batch=True):
         '''
         Fits model usign X input and Y expected output.
             X          : Feature input matrix [n_examples, n_features]
@@ -37,33 +38,34 @@ class Mlp():
             reset      : If set, initialize Theta Weights before training
                 default = False
         '''
-        n_examples = Y.shape[0]
+        n_examples = y.shape[0]
         self.last_error = 0
         self.increasing_errors = 0
         self.decreasing_errors = 0
 
         error = 1
-
+        Y = np.copy(y)
         # transform output range
         t = lambda x: self.range_transform(self.output_range, x, self.input_range)
         Y = t(Y)
 
+        self.gradients, last_delta, A = self.backpropagation(X, Y)
+        self.previous_gradients = self.gradients
+        if self.first_eta_automatic: self.eta = self.get_best_alpha(A,Y)
         if reset:
             self.initialize_theta_weights()
-        self.previous_gradients = None
         if batch:
             for iteration in range(iterations):
                 if error < self.precision:
                     break
-                self.gradients, last_delta = self.backpropagation(X, Y)
-                if self.previous_gradients == None:
-                    self.previous_gradients = self.gradients
+                self.gradients, last_delta, A = self.backpropagation(X, Y)
                 for i in range(len(self.theta_weights)):
                     self.theta_weights[i] = self.theta_weights[i] - self.eta * self.gradients[i] \
                                             + self.momentum*self.previous_gradients[i]
                     self.previous_gradients[i] = - self.eta *  self.gradients[i]
+
                 error = 0.5 * np.sum(np.power(last_delta, 2))
-                print(str(iteration) + "\t" + str(self.eta) + "\t" + str(error))
+                #print(str(iteration) + "\t" + str(self.eta) + "\t" + str(error))
                 if self.eta_adaptative: self.adapt_eta(error)
         else:
             for iteration in range(iterations):
@@ -73,18 +75,40 @@ class Mlp():
                 for i in range(n_examples):
                     patron = X[i, :].reshape((1, X.shape[1]))
                     patron_y = Y[i, :].reshape((1, Y.shape[1]))
-                    self.gradients, last_delta = self.backpropagation(patron, patron_y)
+                    self.gradients, last_delta, A = self.backpropagation(patron, patron_y)
                     errors[i] = last_delta
-                    if self.previous_gradients == None:
-                        self.previous_gradients = self.gradients
+
                     for i in range(len(self.theta_weights)):
                         self.theta_weights[i] = self.theta_weights[i] - self.eta * self.gradients[i] \
                                                 + self.momentum*self.previous_gradients[i]
                         self.previous_gradients[i] = - self.eta * self.gradients[i]
                 error = 0.5 * np.sum(np.power(errors, 2))
                 if self.eta_adaptative: self.adapt_eta(error)
-        print(error)
-        print(iteration)
+                #print(str(iteration) + "\t" + str(self.eta) + "\t" + str(error))
+
+    def get_best_alpha(self, A, Y):
+        g = lambda x: self.g(x, self.params)
+
+        i = len(self.theta_weights) - 1
+        min_eta = 0
+        max_eta = 5
+        step = 0.001
+        best_eta = self.eta
+        best_error = -1
+        for x in np.arange(min_eta, max_eta, step):
+            w = self.theta_weights[i] - x * self.gradients[i] \
+                + self.momentum * self.previous_gradients[i]
+            aux = np.matmul(A[-2], w.transpose())
+            # Activation Function
+            output_layer = g(aux)
+            error_now = 0.5 * np.sum(np.power(Y - output_layer, 2))
+            if best_error == -1 or error_now < best_error:
+                best_eta = x
+                best_error = error_now
+
+        return best_eta
+
+
     def adapt_eta(self, error):
         if self.last_error == 0:
             self.last_error = error
@@ -145,7 +169,7 @@ class Mlp():
             # Regularize weights, except for bias weigths
             grads_tmp[:, 1:] = grads_tmp[:, 1:]
             gradients[ix_layer] = grads_tmp
-        return gradients, last_delta
+        return gradients, last_delta, A
 
     def feedforward(self, X):
         # Implementation of the Feedforward
