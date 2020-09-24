@@ -28,7 +28,6 @@ class SimplePerceptron:
         y:  [n_samples].
 
         """
-        ''' Initialize weights with zeros.'''
 
         deviation = 2 / np.sqrt(X.shape[1]  + 1);
         self.w_ = deviation * np.random.rand(X.shape[1] + 1)

@@ -30,14 +30,6 @@ class Mlp():
         self.initialize_theta_weights()
 
     def train(self, X, y, iterations=800, reset=False, batch=True):
-        '''
-        Fits model usign X input and Y expected output.
-            X          : Feature input matrix [n_examples, n_features]
-            Y          : Expected Output
-            iterations : Number of times Backpropagation is performed. Default 800
-            reset      : If set, initialize Theta Weights before training
-                default = False
-        '''
         n_examples = y.shape[0]
         self.last_error = 0
         self.increasing_errors = 0
