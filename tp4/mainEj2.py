@@ -16,25 +16,19 @@ def multi_layer_perceptron(eta, iterations):
             aux.append([x1,x2,x3,x4,x5,x6,x7])
 
 
-    # df = pd.DataFrame(aux,columns=["Area","GDP","Inflation","Life.expect","Military","Pop.growth","Unemployment"])
-
     df = pd.DataFrame(aux)
 
     X = standarize(df).to_numpy()
-    # X = df.to_numpy()
-   
-    # print(X)
 
+    # eta2 = 0.5 / np.dot(X[0], X[0])
+
+    # print(eta2)
+   
     ppn = p.SimplePerceptron(eta, n_iter=iterations, g=LinearFunction, params=1)
 
 
     ppn.trainOjaRule(X)
     print(ppn.w_)
-
-    # i = 0
-    # for elem in predictions:
-    #     print(str(i) + "\t" + str(float(elem)) + "\t" + str(float(y[i])))
-    #     i += 1
 
 
 def standarize(df):

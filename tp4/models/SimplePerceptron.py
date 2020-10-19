@@ -76,7 +76,7 @@ class SimplePerceptron:
         deviation = 2 / np.sqrt(X.shape[1]);
         self.w_ = deviation * np.random.rand(X.shape[1])
         # self.w_ = np.zeros(X.shape[1])
-        self.errors_ = []
+        self.error = 1
         self.last_error = 0
         self.decreasing_errors = 0
         self.increasing_errors = 0
@@ -90,23 +90,24 @@ class SimplePerceptron:
         self.deltas[0] = np.zeros(X.shape[1])
         # batch
         for _ in range(self.n_iter):
-            errors = 0
             update = np.zeros(X.shape[1])
             for xi in X:
                 y = net_input(xi, self.w_)
                 update += np.reshape(self.eta * y * ( xi - y * self.w_), X.shape[1])
-            self.w_ = update + self.w_ #+ self.momentum *  self.deltas[_]
+            self.w_ = update + self.w_ 
+            #+ self.momentum *  self.deltas[_]
             #self.deltas[_ + 1] = update
 
             # print(self.w_)
-
-            print(np.linalg.norm(self.w_, 2))
-            # self.adapt_eta(0.5 * np.sum(np.power(self.errors_, 2)))
+            w_norm = np.linalg.norm(self.w_, 2)
+            error = abs(1 - w_norm)  
+            # print(w_norm)
+            self.adapt_eta(error)
             # print(self.eta)
             # print(0.5 * np.sum(np.power(self.errors_, 2)))
-            # if 0.5 * np.sum(np.power(self.errors_, 2)) < 0.0001:
-            #     print("error reached")
-            #     break
+            if error < 0.00000000001:
+                print("error reached")
+                break
         return self
 
     def adapt_eta(self, error):
