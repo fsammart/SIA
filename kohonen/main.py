@@ -16,14 +16,20 @@ def main():
     europe_data = (europe_data - np.mean(europe_data, axis=0)) / np.std(europe_data, axis=0)
 
     som = SOM()
-    som.create(5,5, 7)
+    som.create(7,7, 7)
 
     som.fit(europe_data, lr=0.9, n_iter=500)
 
     data_locations, vect_distances = som.find_maching_nodes(europe_data)
 
     umatrix = som.get_umatrix()
-    plt.imshow(umatrix, cmap='gray')
+
+    tmp_umatrix = umatrix.copy()
+    tmp_umatrix -= np.min(tmp_umatrix)
+    tmp_umatrix /= np.max(tmp_umatrix)
+    tmp_umatrix = 1 - tmp_umatrix
+
+    plt.imshow(tmp_umatrix, cmap='gray')
     plt.colorbar()
 
     palette = np.array([[0.90196078, 0.09803922, 0.29411765],

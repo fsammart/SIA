@@ -87,12 +87,14 @@ class SOM(object):
         # other nodes are updated.
         #if neighbor_dist is None:
         #    neighbor_dist =
-        self.nb_dist = min(self.x, self.y) / 1.3# int(neighbor_dist)
-        self.nb_decay = 0.99
+        self.nb_dist = 2 * min(self.x, self.y) / 3# int(neighbor_dist)
+        self.nb_decay = 0.995
+
+        avg_dist = []
 
 
 
-        # Pad the vector map to allow easy array processing.
+        # Add padding to avoid out of index in neighbours
         tmp_node_vects = np.zeros((self.y + 2 * int(np.ceil(self.nb_dist)), self.x + 2 * int(np.ceil(self.nb_dist)), self.ch))
         tmp_node_vects[int(np.ceil(self.nb_dist)): int(np.ceil(self.nb_dist)) + self.y,
         int(np.ceil(self.nb_dist)): int(np.ceil(self.nb_dist)) + self.x] = self.node_vectors.copy()
@@ -104,8 +106,6 @@ class SOM(object):
         data_idx_arr = np.arange(self.input_arr.shape[0])
         n_per_report_step = int(n_data_pts / 20)
 
-        # Main iteration loop. One iteration means that all data is
-        # used once to train the map weights.
         for iteration in range(self.n_iter):
 
             # Shuffle the data indexes.
@@ -118,17 +118,15 @@ class SOM(object):
 
             for idx in range(data_idx_arr.shape[0]):
 
-                # Create array for storing the best matching node indexes
                 bm_node_idx_arr = np.zeros((1, 3), dtype=np.int32)
 
-                # Print progress update on the screen
                 if total_count % n_per_report_step == 0:
                     print_count += 1
                     sys.stdout.write(f'\rProcessing SOM iteration {iteration + 1}/{self.n_iter}' + \
                                      ' [' + '=' * (print_count) + '>' + '.' * (20 - print_count) + ']')
                 total_count += 1
 
-                # Get the input data and calculate distance to the best matching node in the map
+                # best matching node
                 input_idx = data_idx_arr[idx]
                 input_vect = self.input_arr[input_idx]
                 y, x, dist = self.find_best_matching_node(input_vect)
@@ -141,6 +139,8 @@ class SOM(object):
 
             # Print the average input data distance to the best matching node in the map.
             print(f' Average distance = {total_dist / n_data_pts:0.8f}')
+
+            avg_dist.append(total_dist / n_data_pts)
 
             # Update the learnig rate
             self.lr *= self.lr_decay
@@ -156,12 +156,11 @@ class SOM(object):
         self.node_vectors = self.node_vectors[int(np.ceil(self.nb_dist)): int(np.ceil(self.nb_dist)) + self.y,
                             int(np.ceil(self.nb_dist)): int(np.ceil(self.nb_dist)) + self.x]
 
-        # Delete the input data array from the map instance
         del self.input_arr
 
         end_time = time.time()
         self.trained = True
-        print(f'Training done in {end_time - start_time:0.6f} seconds.')
+        plot_error(avg_dist)
 
     def update_node_vectors(self, bm_node_idx_arr):
 
@@ -205,8 +204,6 @@ class SOM(object):
 
 
     def get_umatrix(self):
-        # This method creates a map of average vector distances from each node to the nodes
-        # above, below, left and right.
 
         if not self.trained:
             return False
@@ -254,6 +251,12 @@ class SOM(object):
         cplane = self.node_vectors[:, :, component].copy()
         return cplane
 
+def plot_error(errors):
+    x_coord = [i for i in range(len(errors))]
+    plt.plot(x_coord, errors)
+    plt.ylabel("Distancia Media a Neurona Ganadora")
+    plt.xlabel("Epoca")
+    plt.show()
 
 def plot_data_on_map(umatrix, data_locations, data_colors, data_labels=None,
                      node_width=20,
