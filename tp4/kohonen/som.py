@@ -2,33 +2,30 @@ import numpy as np
 import sys, math, time
 import matplotlib.pyplot as plt
 
+#Class that implements SOM, kohonen network for SIA TP4
 
 class SOM(object):
+
     def __init__(self):
         pass
 
     def create(self, width, height, input_dim):
-        self.x = width  # Map width
-        self.y = height  # Map height
+        self.x = width
+        self.y = height
         self.ch = input_dim
+        #Map not trained at beginning
         self.trained = False
 
     def get_map_vectors(self):
-        # Returns the map vectors.
         if self.trained:
             return self.node_vectors
         else:
             return False
 
     def distance(self, vect_a, vect_b):
-        if self.dist_method == 'euclidean':
-            dist = np.linalg.norm(vect_a - vect_b)
-        elif self.dist_method == 'cosine':
-            dist = 1. - np.dot(vect_a, vect_b) / (np.linalg.norm(vect_a) * np.linalg.norm(vect_b))
-        return dist
+        return np.linalg.norm(vect_a - vect_b)
 
     def find_maching_nodes(self, input_arr):
-        # This is to be called only when the map is trained.
         if self.trained == False:
             return False
 
@@ -39,11 +36,6 @@ class SOM(object):
         print_step = int(n_data / 20)
         print_count = 0
         for idx in range(n_data):
-
-            if idx % print_step == 0:
-                print_count += 1
-                sys.stdout.write(f'\rFinding mathing nodes' +
-                                 ' [' + '=' * (print_count) + '>' + '.' * (20 - print_count) + '] ')
 
             data_vect = input_arr[idx]
             min_dist = None
@@ -78,15 +70,10 @@ class SOM(object):
         start_time = time.time()
         self.initialize_map()
 
-        # Learning rate. This defines how fast the node weights are updated.
         self.lr = lr
         self.lr_decay = 0.995  # lr decay per iteration
 
-        # Neighbor node coverage.
-        # This tells that how far from the best matching node the
-        # other nodes are updated.
-        #if neighbor_dist is None:
-        #    neighbor_dist =
+        # 2/3 of width is initial neighbour distance
         self.nb_dist = 2 * min(self.x, self.y) / 3# int(neighbor_dist)
         self.nb_decay = 0.995
 
@@ -108,10 +95,9 @@ class SOM(object):
 
         for iteration in range(self.n_iter):
 
-            # Shuffle the data indexes.
+            # Shuffle the data indexes. For disordered epoch
             np.random.shuffle(data_idx_arr)
 
-            # Temporary variables
             total_dist = 0
             total_count = 0
             print_count = 0
@@ -120,13 +106,8 @@ class SOM(object):
 
                 bm_node_idx_arr = np.zeros((1, 3), dtype=np.int32)
 
-                if total_count % n_per_report_step == 0:
-                    print_count += 1
-                    sys.stdout.write(f'\rProcessing SOM iteration {iteration + 1}/{self.n_iter}' + \
-                                     ' [' + '=' * (print_count) + '>' + '.' * (20 - print_count) + ']')
                 total_count += 1
 
-                # best matching node
                 input_idx = data_idx_arr[idx]
                 input_vect = self.input_arr[input_idx]
                 y, x, dist = self.find_best_matching_node(input_vect)
@@ -186,7 +167,7 @@ class SOM(object):
 
 
     def find_best_matching_node(self, data_vect):
-        # only for fitting purposes
+        # for usage while fitting, don't call otherwise
 
         min_dist = None
         x = None
@@ -204,6 +185,8 @@ class SOM(object):
 
 
     def get_umatrix(self):
+
+        #U matrix for neighbours at distance <1. UP-RIGHT-DOWN-LEFT
 
         if not self.trained:
             return False
@@ -291,12 +274,10 @@ def plot_data_on_map(umatrix, data_locations, data_colors, data_labels=None,
         for x in range(map_x):
             canvas[:, x * node_width] = node_edge_color
 
-            # Plot the SOM u-matrix as background
     plt.figure(figsize=(map_x * node_width / dpi, map_y * node_width / dpi), dpi=dpi)
 
     plt.imshow(canvas, cmap='gray', interpolation='hanning')
 
-    # Initialize some temp variables
     item_count_map = np.zeros(umatrix.shape)
     n_data_pts = data_locations.shape[0]
 
@@ -316,7 +297,7 @@ def plot_data_on_map(umatrix, data_locations, data_colors, data_labels=None,
 
         plt.axis('off')
 
-    filename = 'SOM_mapping_' + str(int(time.time())) + '.png'
+    filename = 'SOM_country_mapping' + str(int(time.time())) + '.png'
     plt.savefig(filename)
     plt.show()
     print(f'Image saved to {filename}')
