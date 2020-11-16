@@ -4,6 +4,8 @@ import numpy as np
 import copy
 import pickle
 import math
+from PIL import Image, ImageOps
+import os
 
 from DeepNetwork.optimizers import Adam, Adagrad, StochasticGradientDescent,NesterovAcceleratedGradient
 from DeepNetwork.loss_functions import SquareLoss
@@ -36,12 +38,13 @@ class Autoencoder():
     def create_encoder(self, optimizer, loss_function):
 
         encoder = NeuralNetwork(optimizer=optimizer, loss=loss_function)
-        encoder.add(Dense(64, input_shape=(self.img_dim,)))
-        encoder.add(Activation('leaky_relu'))
-        encoder.add(BatchNormalization(momentum=0.8))
-        encoder.add(Dense(32))
-        encoder.add(Activation('leaky_relu'))
-        encoder.add(BatchNormalization(momentum=0.8))
+        encoder.add(Dense(256, input_shape=(self.img_dim,)))
+        encoder.add(Activation('tanh'))
+        # encoder.add(BatchNormalization(momentum=0.8))
+        encoder.add(Dense(128))
+        encoder.add(Activation('tanh'))
+
+        # encoder.add(BatchNormalization(momentum=0.8))
         encoder.add(Dense(self.latent_dim))
         encoder.add(Activation('tanh'))
 
@@ -50,12 +53,12 @@ class Autoencoder():
     def create_decoder(self, optimizer, loss_function):
 
         decoder = NeuralNetwork(optimizer=optimizer, loss=loss_function)
-        decoder.add(Dense(32, input_shape=(self.latent_dim,)))
-        decoder.add(Activation('leaky_relu'))
-        decoder.add(BatchNormalization(momentum=0.8))
-        decoder.add(Dense(64))
-        decoder.add(Activation('leaky_relu'))
-        decoder.add(BatchNormalization(momentum=0.8))
+        decoder.add(Dense(128, input_shape=(self.latent_dim,)))
+        decoder.add(Activation('tanh'))
+        # decoder.add(BatchNormalization(momentum=0.8))
+        decoder.add(Dense(256))
+        decoder.add(Activation('tanh'))
+        # decoder.add(BatchNormalization(momentum=0.8))
         decoder.add(Dense(self.img_dim))
         decoder.add(Activation('tanh'))
 
@@ -95,8 +98,10 @@ class Autoencoder():
                 #self.save_imgs(epoch, X)
                 a=3
 
-        self.save_imgs2(min_error, X, best_auto)
+        self.save_imgs3(min_error, X, best_auto)
         # Check latent space
+
+        return
         latent = best_enc.predict(X)
         self.plot_latent(latent)
 
@@ -174,7 +179,7 @@ class Autoencoder():
         gen_imgs = decoder.predict(X).reshape((-1, self.img_rows, self.img_cols))
 
         # Rescale images 0 - 1
-        gen_imgs = 0.5 * gen_imgs + 0.5
+        # gen_imgs = 0.5 * gen_imgs + 0.5
 
 
         fig, axs = plt.subplots()
@@ -233,6 +238,66 @@ class Autoencoder():
         with open(filename, 'wb') as output :  # Overwrites any existing file.
             pickle.dump(obj, output)
 
+
+    def save_imgs3(self, epoch, X, autoencoder):
+        r, c = 4, 4 # Grid size
+        # Select a random half batch of images
+        #idx = np.random.randint(0, X.shape[0], r*c)
+        imgs = X
+        # Generate images and reshape to image shape
+        gen_imgs = autoencoder.predict(imgs).reshape((-1, self.img_rows, self.img_cols))
+
+        # Rescale images 0 - 1
+        # gen_imgs = 0.5 * gen_imgs + 0.5
+
+        fig, axs = plt.subplots(r, c)
+        plt.suptitle("Autoencoder")
+        cnt = 0
+        for i in range(r):
+            for j in range(c):
+                axs[i,j].imshow(gen_imgs[cnt,:,:], cmap='gray_r')
+                axs[i,j].axis('off')
+                cnt += 1
+        fig.savefig("ae_%f.png" % epoch)
+        plt.close()
+
+
+
+
+def plot_image(image):
+    """
+    :param image: the image to be plotted in a 3-D matrix format
+    :return: None
+    """
+    plt.imshow(image)
+    plt.show()
+
+
+def read_single_image(image_file):
+
+
+    # img = Image.open(image_file).convert('L')
+    img = ImageOps.grayscale(Image.open(image_file))
+
+    img = np.array(img) 
+     
+    normalized_input = (img - np.amin(img)) / (np.amax(img) - np.amin(img))
+    norm_img = 2*normalized_input - 1
+
+    # plot_image(norm_img)
+    return norm_img
+
+
+def load_imgs(path):
+
+    ret = []
+    for f in os.listdir(path):
+        image = read_single_image(os.path.join(path,f))
+        ret.append(image.flatten())
+        # plot_image(image)
+
+    # print(np.array(ret).shape)
+    return np.array(ret)
 
 
 if __name__ == '__main__':
@@ -293,10 +358,16 @@ if __name__ == '__main__':
             mask = 0b00001
             value = mask & line>0
             fonts2[idx][idx2 * 5 + 4] = 1 if value else -1
-    print(fonts2)
+    # print(fonts2)
 
-    ae = Autoencoder(img_rows=7, img_cols=5,latent_dim=2)
-    ae.train(n_epochs=150001, batch_size=32, save_interval=1000, train_data=fonts2)
+
+    flowers = load_imgs('fl2')
+
+    ae = Autoencoder(img_rows=32, img_cols=32,latent_dim=6)
+    ae.train(n_epochs=50001, batch_size=20, save_interval=1000, train_data=flowers)
+
+    # ae = Autoencoder(img_rows=7, img_cols=5,latent_dim=2)
+    # ae.train(n_epochs=150001, batch_size=32, save_interval=1000, train_data=fonts2)
 
 
 

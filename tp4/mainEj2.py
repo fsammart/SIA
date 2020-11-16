@@ -41,6 +41,6 @@ def standarize(df):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    multi_layer_perceptron(0.0001, 1000)
+    multi_layer_perceptron(0.0001, 50)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

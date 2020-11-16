@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 from ActivationFunctions.StepFunction import predict
 from ActivationFunctions.Function import net_input
@@ -73,6 +75,8 @@ class SimplePerceptron:
 
         """
 
+        a = []
+        b = []
         deviation = 2 / np.sqrt(X.shape[1]);
         self.w_ = deviation * np.random.rand(X.shape[1])
         # self.w_ = np.zeros(X.shape[1])
@@ -85,11 +89,17 @@ class SimplePerceptron:
         self.min_eta = 0.00002
         self.iter_update_eta = 2
         self.momentum = 0.7
+        component = [-0.1248739, 0.50050586, -0.40651815, 0.48287333, -0.18811162, 0.47570355, -0.27165582]
 
         self.deltas = [None] * (self.n_iter+1)
         self.deltas[0] = np.zeros(X.shape[1])
         # batch
         for _ in range(self.n_iter):
+
+            distance = np.linalg.norm(self.w_ - component)
+            a.append(_)
+            b.append(distance)
+
             update = np.zeros(X.shape[1])
             for xi in X:
                 y = net_input(xi, self.w_)
@@ -105,9 +115,24 @@ class SimplePerceptron:
             self.adapt_eta(error)
             # print(self.eta)
             # print(0.5 * np.sum(np.power(self.errors_, 2)))
-            if error < 0.00000000001:
-                print("error reached")
-                break
+            # if error < 0.00000000001:
+            #     print("error reached")
+            #     break
+
+
+
+        plt.scatter(a, b, color='blue')
+
+        fig = plt.gcf()
+        axes = fig.gca()
+
+        plt.xlabel('Epoca', fontsize=15)
+        plt.ylabel('distancia entre vector de pesos a la primer componente', fontsize=15)
+        axes.tick_params(axis='x', labelsize=10)
+        axes.tick_params(axis='y', labelsize=10)
+        # axes.set_yscale('log')
+        plt.show()
+
         return self
 
     def adapt_eta(self, error):
