@@ -1,7 +1,5 @@
 from __future__ import division
 import numpy as np
-from utils import accuracy_score
-from DeepNetwork.activation_functions import Sigmoid
 
 class Loss(object):
     def loss(self, y_true, y_pred):

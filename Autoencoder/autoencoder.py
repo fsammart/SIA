@@ -5,7 +5,7 @@ import copy
 import pickle
 import math
 
-from DeepNetwork.optimizers import Adam, Adagrad, StochasticGradientDescent,NesterovAcceleratedGradient
+from DeepNetwork.optimizers import StochasticGradientDescent
 from DeepNetwork.loss_functions import SquareLoss
 from DeepNetwork.layers import Dense, Activation, BatchNormalization
 from DeepNetwork import NeuralNetwork
@@ -38,10 +38,8 @@ class Autoencoder():
         encoder = NeuralNetwork(optimizer=optimizer, loss=loss_function)
         encoder.add(Dense(64, input_shape=(self.img_dim,)))
         encoder.add(Activation('leaky_relu'))
-        encoder.add(BatchNormalization(momentum=0.8))
         encoder.add(Dense(32))
         encoder.add(Activation('leaky_relu'))
-        encoder.add(BatchNormalization(momentum=0.8))
         encoder.add(Dense(self.latent_dim))
         encoder.add(Activation('tanh'))
 
@@ -52,14 +50,123 @@ class Autoencoder():
         decoder = NeuralNetwork(optimizer=optimizer, loss=loss_function)
         decoder.add(Dense(32, input_shape=(self.latent_dim,)))
         decoder.add(Activation('leaky_relu'))
-        decoder.add(BatchNormalization(momentum=0.8))
-        decoder.add(Dense(64))
+        #decoder.add(Dense(64))
+        #decoder.add(Activation('tanh'))
+        decoder.add(Dense(64, input_shape=(self.img_dim,)))
         decoder.add(Activation('leaky_relu'))
-        decoder.add(BatchNormalization(momentum=0.8))
         decoder.add(Dense(self.img_dim))
         decoder.add(Activation('tanh'))
 
         return decoder
+
+
+    def train_noise(self, n_epochs, batch_size=128, save_interval=50, train_data=None, noise_p=0):
+        min_error = 10
+        best_auto = None
+        best_enc = None
+        best_dec = None
+
+        X = train_data
+        f = open("erros_epochs.tsv", "w+")
+        X_noise = np.ndarray((X.shape[0] * 320, X.shape[1]))
+        idx_noise =0
+        for p_noise in np.arange(0,0.21,0.05):
+            for x in range(64):
+                for idx, im in enumerate(X):
+                    for idx2,e in enumerate(im):
+                        elem = e
+                        if np.random.random_sample() < p_noise:
+                            elem = -elem
+                        X_noise[idx_noise][idx2] = elem
+                    idx_noise = idx_noise+1
+        X_c = X_noise
+        X_c2 = X
+        for i in range(319):
+            X_c2 = np.concatenate((X_c2,X))
+        # Rescale [-1, 1]. Not needed because input is {-1,1}
+
+        for epoch in range(n_epochs):
+            # Select a random half batch of images
+            idx = np.random.randint(0, X_c.shape[0], batch_size)
+            imgs = X_c[idx]
+            imgs2 = X_c2[idx]
+
+            # Train the Autoencoder
+            loss, _ = self.autoencoder.train_on_batch(imgs, imgs2)
+
+            # Display the progress
+            print ("%d [D loss: %f]" % (epoch, loss))
+            if loss < min_error:
+                best_auto = copy.deepcopy(self.autoencoder)
+                best_enc = copy.deepcopy(self.encoder)
+                best_dec = copy.deepcopy(self.decoder)
+                min_error = loss
+                f.write("%d %f\n" % (epoch, loss))
+                #self.save_imgs(min_error, X)
+
+            # If at save interval => save generated image samples
+            if epoch % save_interval == 0:
+                #self.save_imgs(epoch, X)
+                a=3
+
+        X_noise2 = np.ndarray(X.shape)
+        for idx, im in enumerate(X) :
+            for idx2, e in enumerate(im) :
+                elem = e
+                if np.random.random_sample() < 0:
+                    elem = -elem
+                X_noise2[idx][idx2] = elem
+
+        self.save_imgs_noisy(-1, X_noise2)
+        self.save_imgs2(1, X_noise2, best_auto)
+
+        X_noise2 = np.ndarray(X.shape)
+        for idx, im in enumerate(X) :
+            for idx2, e in enumerate(im) :
+                elem = e
+                if np.random.random_sample() < 0.05 :
+                    elem = -elem
+                X_noise2[idx][idx2] = elem
+
+        self.save_imgs_noisy(-2, X_noise2)
+        self.save_imgs2(2, X_noise2, best_auto)
+
+        X_noise2 = np.ndarray(X.shape)
+        for idx, im in enumerate(X) :
+            for idx2, e in enumerate(im) :
+                elem = e
+                if np.random.random_sample() < 0.1 :
+                    elem = -elem
+                X_noise2[idx][idx2] = elem
+
+        self.save_imgs_noisy(-3, X_noise2)
+        self.save_imgs2(3, X_noise2, best_auto)
+
+        X_noise2 = np.ndarray(X.shape)
+        for idx, im in enumerate(X) :
+            for idx2, e in enumerate(im) :
+                elem = e
+                if np.random.random_sample() < 0.15 :
+                    elem = -elem
+                X_noise2[idx][idx2] = elem
+
+        self.save_imgs_noisy(-4, X_noise2)
+        self.save_imgs2(4, X_noise2, best_auto)
+
+        X_noise2 = np.ndarray(X.shape)
+        for idx, im in enumerate(X) :
+            for idx2, e in enumerate(im) :
+                elem = e
+                if np.random.random_sample() < 0.18 :
+                    elem = -elem
+                X_noise2[idx][idx2] = elem
+
+        self.save_imgs_noisy(-5, X_noise2)
+        self.save_imgs2(5, X_noise2, best_auto)
+        # Check latent space
+        latent = best_enc.predict(X)
+        self.plot_latent(latent)
+        return
 
     def train(self, n_epochs, batch_size=128, save_interval=50, train_data=None):
         min_error = 10
@@ -95,11 +202,12 @@ class Autoencoder():
                 #self.save_imgs(epoch, X)
                 a=3
 
+
         self.save_imgs2(min_error, X, best_auto)
         # Check latent space
         latent = best_enc.predict(X)
         self.plot_latent(latent)
-
+        return
         # from f to { 18 - 14. 2 points
         x_r,y_r = latent[27]
         x_n, y_n = latent[6]
@@ -184,6 +292,24 @@ class Autoencoder():
         axs.axis('off')
 
         fig.savefig("letters/" + name + "-trans_%f.png" % d)
+        plt.close()
+    def save_imgs_noisy(self, epoch, X):
+        r, c = 8, 4 # Grid size
+        # Select a random half batch of images
+        #idx = np.random.randint(0, X.shape[0], r*c)
+        imgs = X
+        # Generate images and reshape to image shape
+        gen_imgs = X.reshape((-1, self.img_rows, self.img_cols))
+
+        fig, axs = plt.subplots(r, c)
+        plt.suptitle("Autoencoder")
+        cnt = 0
+        for i in range(r):
+            for j in range(c):
+                axs[i,j].imshow(gen_imgs[cnt,:,:], cmap='gray_r')
+                axs[i,j].axis('off')
+                cnt += 1
+        fig.savefig("noisy_%f.png" % epoch)
         plt.close()
     def save_imgs2(self, epoch, X, autoencoder):
         r, c = 8, 4 # Grid size
@@ -296,7 +422,7 @@ if __name__ == '__main__':
     print(fonts2)
 
     ae = Autoencoder(img_rows=7, img_cols=5,latent_dim=2)
-    ae.train(n_epochs=150001, batch_size=32, save_interval=1000, train_data=fonts2)
+    ae.train(n_epochs=50000, batch_size=5, save_interval=1000, train_data=fonts2)
 
 
 
